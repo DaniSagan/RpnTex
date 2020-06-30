@@ -5,59 +5,26 @@
   <meta name="viewport" content="width=device-width">
   <title>RpnTex</title>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="css/styles.css" type="text/css">
 </head>
 <body>
-    <script type="text/javascript" src="calc.js"></script>
-    <script>
-        var calc = new Calc();
-
-        function updateStackTextArea() {
-            var text = "";            
-            for(var k = calc.stack.count() - 1; k >= 0; k--) {
-                text = text.concat("[" + k.toString() + "]    " + calc.stack.get(k).toString() + "\n");
-            }
-            console.log("text to add: " + text);
-            document.getElementById("stackArea").value = text;
-        }
-
-        function updateEquationText() {
-            if(calc.stack.count() > 0) {
-                console.log("latex code: " + calc.stack.get(0).formatLatex());
-                document.getElementById("equationText").innerHTML = "\\[ " + calc.stack.get(0).formatLatex() + " \\]";
-            } else {
-                document.getElementById("equationText").innerHTML = "";
-            }
-        }
-
-        function onTestChange() {
-            var key = window.event.keyCode;
-            if (key === 13) {
-                var words = document.getElementById("commandArea").value;
-                for(word of words.split(" ")) {
-                    calc.process(word)
-                }
-                updateStackTextArea();
-                updateEquationText();
-                MathJax.typeset();
-                document.getElementById("commandArea").value = "";
-                return false;
-            }
-            else {
-                return true;
-            }
-        }
-
-        window.MathJax = {
-            loader: {load: ['[tex]/color']},
-            tex: {packages: {'[+]': ['color']}}
-        };
-    </script>
-    <textarea id="stackArea" readonly="true" rows="10" cols="80"></textarea>
-    <br>
-    <input id="commandArea" type="text" size="80" onkeypress="onTestChange();"></textarea>
-    <p id="equationText"></p>
+    <header>
+        <h1>Rpn\Tex</h1>
+    </header>
+    <main>
+        <div class="wrap">
+            <div id="equationArea">
+                <p id="equationText"></p>
+            </div>
+            <textarea id="stackArea" readonly="true" rows="10"></textarea>
+            <br>
+            <input id="commandArea" type="text" placeholder=">>" onkeypress="onTestChange();"></textarea>
+            <button type="button" onclick="process();">Execute</button>
+        </div>
+    </main>
+    <footer></footer>
+    <script type="text/javascript" src="js/calc.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>

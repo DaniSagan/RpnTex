@@ -1,0 +1,35 @@
+header {
+    background-color: #312A3F;
+    padding: 5px;
+    padding-left: 20px;
+}
+
+header h1 {
+    color: antiquewhite;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #eeeeee;
+}
+
+.wrap {
+    margin: 0 auto;
+    max-width: 800px;
+    min-width: 600px;
+}
+
+#equationArea {
+    min-height: 100px;
+    vertical-align: middle;
+    background-color: #ffffff;
+    padding: 5px;
+    padding-top: 20px;
+}
+
+#stackArea {
+  width:100%;
+  padding: 5px;
+  font-family: monospace;
+}

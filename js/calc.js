@@ -10,6 +10,13 @@ function isInteger(value) {
     return false;
 }
 
+function greatestCommonDivisor(n1, n2) {
+    if (n2 === 0) {  
+        return n1 
+    } 
+    return greatestCommonDivisor(n2, n1 % n2);
+}
+
 /**
  * 
  * @param {String} str
@@ -26,7 +33,7 @@ function isLetter(str) {
  * @returns {String}
  */
 function addParentheses(value, needsParenthesesFunction) {
-    return needsParenthesesFunction() ? `(${value})` : value;
+    return needsParenthesesFunction() ? `\\left(${value}\\right)` : value;
 }
 
 class StackItem {
@@ -141,6 +148,45 @@ class Sqrt extends StackItem {
     }
 }
 
+class Neg extends StackItem {
+    /**
+     * @param {StackItem} value
+     */
+    constructor(value) {
+        super();
+        this.value = value;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    needs_parentheses() {
+        if(this.value instanceof Integer ||
+           this.value instanceof Real ||
+           this.value instanceof Variable ||
+           this.value instanceof Fraction ||
+           this.value instanceof Power)
+        {
+            return false;            
+        }
+        return true;
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return this.needs_parentheses() ? `-(${this.value.toString()})` : `-${this.value.toString()}`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatLatex() {
+        return this.needs_parentheses() ? `-\\left(${this.value.toString()}\\right)` : `-${this.value.toString()}`;
+    }
+}
+
 class BinaryOperation extends StackItem {
     /**
      * @param {StackItem} lhs
@@ -184,9 +230,9 @@ class BinaryOperation extends StackItem {
      */
     formatLatex() {
         var res = "";
-        res += this.lhs_needs_parentheses() ? "(" + this.lhs.formatLatex() + ")" : this.lhs.formatLatex();
+        res += this.lhs_needs_parentheses() ? "\\left(" + this.lhs.formatLatex() + "\\right)" : this.lhs.formatLatex();
         res += this.operator;
-        res += this.rhs_needs_parentheses() ? "(" + this.rhs.formatLatex() + ")" : this.rhs.formatLatex();
+        res += this.rhs_needs_parentheses() ? "\\left(" + this.rhs.formatLatex() + "\\right)" : this.rhs.formatLatex();
         return res;
     }
 }
@@ -224,12 +270,12 @@ class Sum extends BinaryOperation {
     rhs_needs_parentheses() {
         if(this.rhs instanceof Integer || 
            this.rhs instanceof Real ||
-           this.lhs instanceof Sqrt ||  
+           this.rhs instanceof Sqrt ||  
            this.rhs instanceof Sum || 
            this.rhs instanceof Variable ||
-           this.lhs instanceof Multiplication ||
-           this.lhs instanceof Fraction ||
-           this.lhs instanceof Power) {
+           this.rhs instanceof Multiplication ||
+           this.rhs instanceof Fraction ||
+           this.rhs instanceof Power) {
             return false;
         }
         return true;
@@ -263,7 +309,9 @@ class Subtraction extends BinaryOperation {
      * @returns {boolean}
      */
     rhs_needs_parentheses() {
-        if(this.rhs instanceof Integer || this.rhs instanceof Real  || this.rhs instanceof Variable) {
+        if(this.rhs instanceof Integer || 
+           this.rhs instanceof Real  || 
+           this.rhs instanceof Variable) {
             return false;
         }
         return true;
@@ -283,7 +331,13 @@ class Multiplication extends BinaryOperation {
      * @returns {boolean}
      */
     lhs_needs_parentheses() {
-        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable || this.lhs instanceof Multiplication) {
+        if(this.lhs instanceof Integer || 
+           this.lhs instanceof Real || 
+           this.lhs instanceof Variable || 
+           this.lhs instanceof Multiplication ||
+           this.lhs instanceof Power || 
+           this.lhs instanceof Sqrt ||
+           this.lhs instanceof Fraction) {
             return false;
         }
         return true;
@@ -293,7 +347,13 @@ class Multiplication extends BinaryOperation {
      * @returns {boolean}
      */
     rhs_needs_parentheses() {
-        if(this.rhs instanceof Integer || this.rhs instanceof Real  || this.rhs instanceof Variable || this.lhs instanceof Multiplication) {
+        if(this.rhs instanceof Integer || 
+           this.rhs instanceof Real  || 
+           this.rhs instanceof Variable || 
+           this.rhs instanceof Multiplication || 
+           this.rhs instanceof Power || 
+           this.rhs instanceof Sqrt || 
+           this.rhs instanceof Fraction) {
             return false;
         }
         return true;
@@ -451,9 +511,155 @@ class Stack {
     }
 }
 
+class StackCmdBase {
+    constructor() {
+        if(new.target === StackCmdBase) {
+            throw new TypeError("Cannot create an instance of an abstract class");
+        }
+    }
+
+    /**
+     * 
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+
+    }
+}
+
+class StackCmdEval extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop(); /** @type {StackItem} */
+        var evaluatedItem = this.eval(item);
+        stack.push(evaluatedItem);
+    }
+
+    /**
+     * 
+     * @param {StackItem} item
+     * @returns {StackItem} 
+     */
+    eval(item) {
+        if(item instanceof Neg) {
+            var evalValue = this.eval(item.value);
+            if(evalValue instanceof Integer) {
+                return new Integer(-evalValue);
+            } else {
+                return new Neg(evalValue);
+            }
+        } else if(item instanceof Sum) {
+            var evalLhs = this.eval(item.lhs);
+            var evalRhs = this.eval(item.rhs);
+            if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
+                return new Integer(evalLhs.value + evalRhs.value);
+            } else {
+                return new Sum(evalLhs, evalRhs);
+            }
+        } else if(item instanceof Subtraction) {
+            var evalLhs = this.eval(item.lhs);
+            var evalRhs = this.eval(item.rhs);
+            if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
+                return new Integer(evalLhs.value - evalRhs.value);
+            } else {
+                return new Subtraction(evalLhs, evalRhs);
+            }                
+        } else if(item instanceof Multiplication) {
+            var evalLhs = this.eval(item.lhs);
+            var evalRhs = this.eval(item.rhs);
+            if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
+                return new Integer(evalLhs.value * evalRhs.value);
+            } else if(evalLhs instanceof Integer) {
+                if(evalLhs.value === 1) {
+                    return evalRhs;
+                } else {
+                    return new Multiplication(evalLhs, evalRhs);
+                }
+            } else if(evalRhs instanceof Integer) {
+                if(evalRhs.value === 1) {
+                    return evalLhs;
+                } else {
+                    return new Multiplication(evalLhs, evalRhs);
+                }
+            } else {
+                return new Multiplication(evalLhs, evalRhs);
+            }                
+        } else if(item instanceof Fraction) {
+            var evalLhs = this.eval(item.lhs);
+            var evalRhs = this.eval(item.rhs);
+            if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
+                if(evalRhs.value === 1) {
+                    return new Integer(evalLhs.value);
+                } else {
+                    var gcd = greatestCommonDivisor(evalLhs.value, evalRhs.value);
+                    return new Fraction(new Integer(parseInt(evalLhs.value/gcd)), new Integer(parseInt(evalRhs.value/gcd)));
+                }                
+            } else if(evalLhs instanceof Integer && evalRhs instanceof Fraction) {
+                var newLhs = this.eval(new Multiplication(evalLhs, evalRhs.rhs));
+                var newRhs = this.eval(evalRhs.lhs);
+                return new Fraction(newLhs, newRhs);
+            } else {
+                return new Fraction(evalLhs, evalRhs);
+            }                
+        } else if(item instanceof Power) {
+            var evalLhs = this.eval(item.lhs);
+            var evalRhs = this.eval(item.rhs);
+            return new Power(evalLhs, evalRhs);                
+        } else {
+            return item;
+        }
+    }
+}
+
+class StackCmdSum extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop(); /** @type {StackItem} */
+        var item1 = stack.pop(); /** @type {StackItem} */
+        stack.push(new Sum(item1, item2));
+    }
+}
+
+class StackCmdSubtraction extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop(); /** @type {StackItem} */
+        var item1 = stack.pop(); /** @type {StackItem} */
+        stack.push(new Subtraction(item1, item2));
+    }
+}
+
 class Calc {
     constructor() {
-        this.stack = new Stack()
+        this.stack = new Stack();
+        this.wordDict = {}; /** @type {Object} */
+    }
+
+    /**
+     * 
+     * @param {string} key 
+     * @param {class} command 
+     */
+    registerWord(key, command) {
+        this.wordDict[key] = command;
     }
 
     /**
@@ -466,14 +672,17 @@ class Calc {
             } else {
                 this.stack.push(new Integer(parseFloat(word)));
             }
+        } else if(word in this.wordDict) {
+            var cmd = new this.wordDict[word]();
+            cmd.execute(this.stack);
         } else if (word === "+") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Sum(item1, item2));
+            // var item2 = this.stack.pop();
+            // var item1 = this.stack.pop();
+            // this.stack.push(new Sum(item1, item2));
         } else if (word === "-") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Subtraction(item1, item2));
+            // var item2 = this.stack.pop();
+            // var item1 = this.stack.pop();
+            // this.stack.push(new Subtraction(item1, item2));
         } else if (word === "*") {
             var item2 = this.stack.pop();
             var item1 = this.stack.pop();
@@ -482,7 +691,7 @@ class Calc {
             var item2 = this.stack.pop();
             var item1 = this.stack.pop();
             this.stack.push(new Fraction(item1, item2));
-        } else if (word === "^") {
+        } else if (word === "^" || word === "pow") {
             var item2 = this.stack.pop();
             var item1 = this.stack.pop();
             this.stack.push(new Power(item1, item2));
@@ -492,6 +701,9 @@ class Calc {
         } else if (word === "sqrt") {
             var item = this.stack.pop();
             this.stack.push(new Sqrt(item));
+        } else if (word === "neg") {
+            var item = this.stack.pop();
+            this.stack.push(new Neg(item));
         } else if (word === "=") {
             var item2 = this.stack.pop();
             var item1 = this.stack.pop();
