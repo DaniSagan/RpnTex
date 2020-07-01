@@ -13,6 +13,7 @@ calc.registerWord("neg", StackCmdNeg);
 calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);
 calc.registerWord("..", StackCmdDrop);
+calc.registerWord("swap", StackCmdSwap);
 
 function updateStackTextArea() {
     var text = "";            

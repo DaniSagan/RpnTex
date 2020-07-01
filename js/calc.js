@@ -327,6 +327,7 @@ class Subtraction extends BinaryOperation {
            this.lhs instanceof Real || 
            this.lhs instanceof Sum || 
            this.lhs instanceof Subtraction || 
+           this.lhs instanceof Fraction || 
            this.lhs instanceof Variable ||
            this.lhs instanceof Abs) {
             return false;
@@ -340,6 +341,7 @@ class Subtraction extends BinaryOperation {
     rhs_needs_parentheses() {
         if(this.rhs instanceof Integer || 
            this.rhs instanceof Real  || 
+           this.lhs instanceof Fraction || 
            this.rhs instanceof Variable||
            this.rhs instanceof Abs) {
             return false;
@@ -399,6 +401,20 @@ class Fraction extends BinaryOperation {
      */
     constructor(lhs, rhs) {
         super(lhs, rhs, "/");
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numerator() {
+        return this.lhs;
+    }
+
+    /**
+     * @returns {StackItem} 
+     */
+    get denominator() {
+        return this.rhs;
     }
 
     /**
@@ -537,7 +553,11 @@ class Stack {
      * @returns {StackItem}
      */
     pop() {
-        return this.items.shift();
+        if(this.items.length > 0) {
+            return this.items.shift();
+        } else {
+            throw new Error("Stack is empty");
+        }
     }
 
     /**
@@ -595,7 +615,9 @@ class StackCmdEval extends StackCmdBase {
         } else if(item instanceof Fraction) {
             return this.evalFraction(item);                
         } else if(item instanceof Power) {
-            return this.evalPower(item);               
+            return this.evalPower(item);  
+        } else if(item instanceof Sqrt) {
+            return this.evalSqrt(item);             
         } else {
             return item;
         }
@@ -624,6 +646,18 @@ class StackCmdEval extends StackCmdBase {
         var evalRhs = this.eval(item.rhs);
         if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
             return new Integer(evalLhs.value + evalRhs.value);
+        } else if(evalLhs instanceof Integer && evalRhs instanceof Fraction) {
+            var numerator = new Sum(new Multiplication(evalLhs, evalRhs.denominator), evalRhs.numerator);
+            var denominator = evalRhs.denominator;
+            return this.evalFraction(new Fraction(numerator, denominator));
+        } else if(evalLhs instanceof Fraction && evalRhs instanceof Integer) {
+            var numerator = new Sum(evalLhs.numerator, new Multiplication(evalRhs, evalLhs.denominator));
+            var denominator = evalLhs.denominator;
+            return this.evalFraction(new Fraction(numerator, denominator));
+        } else if(evalLhs instanceof Fraction && evalRhs instanceof Fraction) {
+            var numerator = new Sum(new Multiplication(evalLhs.numerator, evalRhs.denominator), new Multiplication(evalRhs.numerator, evalLhs.denominator));
+            var denominator = new Multiplication(evalLhs.denominator, evalRhs.denominator);
+            return this.evalFraction(new Fraction(numerator, denominator));
         } else {
             return new Sum(evalLhs, evalRhs);
         }
@@ -679,13 +713,18 @@ class StackCmdEval extends StackCmdBase {
     evalFraction(item) {
         var evalLhs = this.eval(item.lhs);
         var evalRhs = this.eval(item.rhs);
+        if(evalRhs instanceof Integer && evalRhs.value === 1) {
+            return evalLhs;
+        }
         if(evalLhs instanceof Integer && evalRhs instanceof Integer) {
-            if(evalRhs.value === 1) {
-                return new Integer(evalLhs.value);
+            var gcd = greatestCommonDivisor(evalLhs.value, evalRhs.value);
+            var numerator = parseInt(evalLhs.value/gcd);
+            var denominator = parseInt(evalRhs.value/gcd);
+            if(denominator === 1) {
+                return Integer(numerator);
             } else {
-                var gcd = greatestCommonDivisor(evalLhs.value, evalRhs.value);
-                return new Fraction(new Integer(parseInt(evalLhs.value/gcd)), new Integer(parseInt(evalRhs.value/gcd)));
-            }                
+                return new Fraction(new Integer(numerator), new Integer(denominator));              
+            }
         } else if(evalLhs instanceof Integer && evalRhs instanceof Fraction) {
             var newLhs = this.eval(new Multiplication(evalLhs, evalRhs.rhs));
             var newRhs = this.eval(evalRhs.lhs);
@@ -704,6 +743,16 @@ class StackCmdEval extends StackCmdBase {
         var evalLhs = this.eval(item.lhs);
         var evalRhs = this.eval(item.rhs);
         return new Power(evalLhs, evalRhs); 
+    }
+
+    /**
+     * 
+     * @param {Sqrt} item
+     * @returns {StackItem} 
+     */
+    evalSqrt(item) {
+        var evalValue = this.eval(item.value);
+        return new Sqrt(evalValue); 
     }
 }
 
