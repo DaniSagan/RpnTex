@@ -2,7 +2,17 @@ var calc = new Calc();
 calc.registerWord("eval", StackCmdEval);
 calc.registerWord("+", StackCmdSum);
 calc.registerWord("-", StackCmdSubtraction);
+calc.registerWord("*", StackCmdMultiplication);
+calc.registerWord("/", StackCmdFraction);
 calc.registerWord("abs", StackCmdAbs);
+calc.registerWord("^", StackCmdPower);
+calc.registerWord("pow", StackCmdPower);
+calc.registerWord("inv", StackCmdInv);
+calc.registerWord("sqrt", StackCmdSqrt);
+calc.registerWord("neg", StackCmdNeg);
+calc.registerWord("=", StackCmdEquality);
+calc.registerWord(".", StackCmdDup);
+calc.registerWord("..", StackCmdDrop);
 
 function updateStackTextArea() {
     var text = "";            

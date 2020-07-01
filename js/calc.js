@@ -169,7 +169,7 @@ class Abs extends StackItem {
      * @return {String}
      */
     formatLatex() {
-        return `\\left\\|${this.value.formatLatex()}\\right\\|`;
+        return `\\left|${this.value.formatLatex()}\\right|`;
     }
 }
 
@@ -190,7 +190,8 @@ class Neg extends StackItem {
            this.value instanceof Real ||
            this.value instanceof Variable ||
            this.value instanceof Fraction ||
-           this.value instanceof Power)
+           this.value instanceof Power || 
+           this.value instanceof Abs)
         {
             return false;            
         }
@@ -283,7 +284,8 @@ class Sum extends BinaryOperation {
            this.lhs instanceof Variable || 
            this.lhs instanceof Multiplication ||
            this.lhs instanceof Fraction ||
-           this.lhs instanceof Power) {
+           this.lhs instanceof Power ||
+           this.lhs instanceof Abs) {
             return false;
         }
         return true;
@@ -300,7 +302,8 @@ class Sum extends BinaryOperation {
            this.rhs instanceof Variable ||
            this.rhs instanceof Multiplication ||
            this.rhs instanceof Fraction ||
-           this.rhs instanceof Power) {
+           this.rhs instanceof Power ||
+           this.rhs instanceof Abs) {
             return false;
         }
         return true;
@@ -324,7 +327,8 @@ class Subtraction extends BinaryOperation {
            this.lhs instanceof Real || 
            this.lhs instanceof Sum || 
            this.lhs instanceof Subtraction || 
-           this.lhs instanceof Variable) {
+           this.lhs instanceof Variable ||
+           this.lhs instanceof Abs) {
             return false;
         }
         return true;
@@ -336,7 +340,8 @@ class Subtraction extends BinaryOperation {
     rhs_needs_parentheses() {
         if(this.rhs instanceof Integer || 
            this.rhs instanceof Real  || 
-           this.rhs instanceof Variable) {
+           this.rhs instanceof Variable||
+           this.rhs instanceof Abs) {
             return false;
         }
         return true;
@@ -362,7 +367,8 @@ class Multiplication extends BinaryOperation {
            this.lhs instanceof Multiplication ||
            this.lhs instanceof Power || 
            this.lhs instanceof Sqrt ||
-           this.lhs instanceof Fraction) {
+           this.lhs instanceof Fraction ||
+           this.lhs instanceof Abs) {
             return false;
         }
         return true;
@@ -378,7 +384,8 @@ class Multiplication extends BinaryOperation {
            this.rhs instanceof Multiplication || 
            this.rhs instanceof Power || 
            this.rhs instanceof Sqrt || 
-           this.rhs instanceof Fraction) {
+           this.rhs instanceof Fraction ||
+           this.rhs instanceof Abs) {
             return false;
         }
         return true;
@@ -398,7 +405,10 @@ class Fraction extends BinaryOperation {
      * @returns {boolean}
      */
     lhs_needs_parentheses() {
-        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable || this.lhs instanceof Multiplication) {
+        if(this.lhs instanceof Integer || 
+           this.lhs instanceof Real || 
+           this.lhs instanceof Variable || 
+           this.lhs instanceof Multiplication) {
             return false;
         }
         return true;
@@ -408,7 +418,9 @@ class Fraction extends BinaryOperation {
      * @returns {boolean}
      */
     rhs_needs_parentheses() {
-        if(this.rhs instanceof Integer || this.rhs instanceof Real  || this.rhs instanceof Variable) {
+        if(this.rhs instanceof Integer || 
+           this.rhs instanceof Real  || 
+           this.rhs instanceof Variable) {
             return false;
         }
         return true;
@@ -695,6 +707,20 @@ class StackCmdEval extends StackCmdBase {
     }
 }
 
+class StackCmdAbs extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop(); /** @type {StackItem} */
+        stack.push(new Abs(item));
+    }
+}
+
 class StackCmdSum extends StackCmdBase {
     constructor() {
         super();
@@ -710,20 +736,6 @@ class StackCmdSum extends StackCmdBase {
     }
 }
 
-class StackCmdAbs extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop(); /** @type {StackItem} */
-        stack.push(new Abs(item));
-    }
-}
-
 class StackCmdSubtraction extends StackCmdBase {
     constructor() {
         super();
@@ -736,6 +748,151 @@ class StackCmdSubtraction extends StackCmdBase {
         var item2 = stack.pop(); /** @type {StackItem} */
         var item1 = stack.pop(); /** @type {StackItem} */
         stack.push(new Subtraction(item1, item2));
+    }
+}
+
+class StackCmdMultiplication extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop(); /** @type {StackItem} */
+        var item1 = stack.pop(); /** @type {StackItem} */
+        stack.push(new Multiplication(item1, item2));
+    }
+}
+
+class StackCmdFraction extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop(); /** @type {StackItem} */
+        var item1 = stack.pop(); /** @type {StackItem} */
+        stack.push(new Fraction(item1, item2));
+    }
+}
+
+class StackCmdPower extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop(); /** @type {StackItem} */
+        var item1 = stack.pop(); /** @type {StackItem} */
+        stack.push(new Power(item1, item2));
+    }
+}
+
+class StackCmdInv extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Fraction(new Integer(1), item));
+    }
+}
+
+class StackCmdSqrt extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Sqrt(item));
+    }
+}
+
+class StackCmdNeg extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Neg(item));
+    }
+}
+
+class StackCmdEquality extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop();
+        var item1 = stack.pop();
+        stack.push(new Equality(item1, item2));
+    }
+}
+
+class StackCmdDup extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.get(0);
+        stack.push(item);
+    }
+}
+
+class StackCmdDrop extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+    }
+}
+
+class StackCmdSwap extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item2 = stack.pop();
+        var item1 = stack.pop();
+        stack.push(item1);
+        stack.push(item2);
     }
 }
 
@@ -763,49 +920,11 @@ class Calc {
             if(isInteger(word)) {
                 this.stack.push(new Integer(parseInt(word, 10)));
             } else {
-                this.stack.push(new Integer(parseFloat(word)));
+                this.stack.push(new Real(parseFloat(word)));
             }
         } else if(word in this.wordDict) {
             var cmd = new this.wordDict[word]();
             cmd.execute(this.stack);
-        } else if (word === "+") {
-            // var item2 = this.stack.pop();
-            // var item1 = this.stack.pop();
-            // this.stack.push(new Sum(item1, item2));
-        } else if (word === "-") {
-            // var item2 = this.stack.pop();
-            // var item1 = this.stack.pop();
-            // this.stack.push(new Subtraction(item1, item2));
-        } else if (word === "*") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Multiplication(item1, item2));
-        } else if (word === "/") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Fraction(item1, item2));
-        } else if (word === "^" || word === "pow") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Power(item1, item2));
-        } else if (word === "inv") {
-            var item = this.stack.pop();
-            this.stack.push(new Fraction(new Integer(1), item));
-        } else if (word === "sqrt") {
-            var item = this.stack.pop();
-            this.stack.push(new Sqrt(item));
-        } else if (word === "neg") {
-            var item = this.stack.pop();
-            this.stack.push(new Neg(item));
-        } else if (word === "=") {
-            var item2 = this.stack.pop();
-            var item1 = this.stack.pop();
-            this.stack.push(new Equality(item1, item2));
-        } else if (word === ".") {
-            var item = this.stack.get(0);
-            this.stack.push(item);
-        } else if (word === "..") {
-            var item = this.stack.pop();
         } else if (isLetter(word)) {
             this.stack.push(new Variable(word));
         } else {
