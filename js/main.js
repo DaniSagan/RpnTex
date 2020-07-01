@@ -2,6 +2,7 @@ var calc = new Calc();
 calc.registerWord("eval", StackCmdEval);
 calc.registerWord("+", StackCmdSum);
 calc.registerWord("-", StackCmdSubtraction);
+calc.registerWord("abs", StackCmdAbs);
 
 function updateStackTextArea() {
     var text = "";            
@@ -35,12 +36,13 @@ function onTestChange() {
 function process() {
     var words = document.getElementById("commandArea").value;
     for(word of words.split(" ")) {
-        calc.process(word)
+        calc.process(word) /** @type {boolean} */
     }
     updateStackTextArea();
     updateEquationText();
     MathJax.typeset();
     document.getElementById("commandArea").value = "";
+    document.getElementById("commandArea").focus();
     return false;
 }
 
