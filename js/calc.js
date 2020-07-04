@@ -1,3 +1,16 @@
+'use strict';
+
+/**
+ * @returns {String}
+ */
+var nextId = (function () {
+    var counter = 0;
+    return function () {
+        counter += 1; 
+        return `rpntex-id${counter}`
+    }
+})();
+
 /**
  * 
  * @param {String} str
@@ -36,7 +49,32 @@ function addParentheses(value, needsParenthesesFunction) {
     return needsParenthesesFunction() ? `\\left(${value}\\right)` : value;
 }
 
+class StackItemVisitor {
+    constructor() {
+
+    }
+    /**
+     * 
+     * @param {StackItem} item 
+     */
+    visit(item) {
+        throw new Error("Wrong visitor");
+    }
+}
+
 class StackItem {
+    /**
+     * @param {StackItem} parent 
+     */
+    constructor() {
+        /** @type {String} */
+        this.id = nextId(); 
+        /** @type {String} */
+        this.className = "rpntex-item";
+        /** @type {StackItem} */ 
+        this.parent = parent;
+    }
+
     /**
      * @return {String}
      */
@@ -50,6 +88,54 @@ class StackItem {
     formatLatex() {
         return "";
     }
+
+    /**
+     * @return {String}
+     */
+    formatLatex() {
+        return `\\class{${this.className}}{\\cssId{${this.id}}{${this.formatInnerLatex()}}}`;
+    }
+
+    /**
+     * 
+     * @param {String} id 
+     * @returns {StackItem}
+     */
+    findById(id) {
+        if(this.id === id) {
+            return this;
+        }
+        for(var child of this.children) {
+            var item = child.findById(id);
+            if(item != null) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 
+     * @param {function(StackItem) => StackItem} fn 
+     */
+    apply(fn) {
+        return this;
+    }
+
+    /**
+     * 
+     * @param {StackItemVisitor} visitor 
+     */
+    accept(visitor) {
+        visitor.visit(this);
+    }
+
+    /**
+     * @returns {Array<StackItem>}
+     */
+    get children() {
+        return [];
+    }
 }
 
 class Integer extends StackItem {
@@ -58,7 +144,7 @@ class Integer extends StackItem {
      */
     constructor(value) {
         super();
-        this.value = value;
+        this.value = value; /** @type {number} */
     }
 
     /**
@@ -71,7 +157,7 @@ class Integer extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return this.value.toString();
     }
 }
@@ -95,7 +181,7 @@ class Real extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return this.value.toString();
     }
 }
@@ -106,7 +192,8 @@ class Variable extends StackItem {
      */
     constructor(name) {
         super();
-        this.name = name;
+        /** @type {String} */
+        this.name = name; 
     }
 
     /**
@@ -119,19 +206,44 @@ class Variable extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         // return `{\\color{red}{${this.name}}}`;
         return `${this.name}`;
     }
 }
 
-class Sqrt extends StackItem {
+class UnaryOperation extends StackItem {
     /**
      * @param {StackItem} value
      */
     constructor(value) {
         super();
+        /** @type {StackItem} */
         this.value = value;
+    }
+
+    /**
+     * 
+     * @param {function(StackItem) => StackItem} fn 
+     */
+    apply(fn) {
+        this.value = fn(value);
+    }
+
+    /**
+     * @returns {Array.<StackItem>}
+     */
+    get children() {
+        return [this.value];
+    }
+}
+
+class Sqrt extends UnaryOperation {
+    /**
+     * @param {StackItem} value
+     */
+    constructor(value) {
+        super(value);
     }
 
     /**
@@ -144,18 +256,17 @@ class Sqrt extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return `\\sqrt{${this.value.formatLatex()}}`;
     }
 }
 
-class Abs extends StackItem {
+class Abs extends UnaryOperation {
     /**
      * @param {StackItem} value
      */
     constructor(value) {
-        super();
-        this.value = value;
+        super(value);
     }
 
     /**
@@ -168,18 +279,17 @@ class Abs extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return `\\left|${this.value.formatLatex()}\\right|`;
     }
 }
 
-class Neg extends StackItem {
+class Neg extends UnaryOperation {
     /**
      * @param {StackItem} value
      */
     constructor(value) {
-        super();
-        this.value = value;
+        super(value);
     }
 
     /**
@@ -208,7 +318,7 @@ class Neg extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return this.needs_parentheses() ? `-\\left(${this.value.toString()}\\right)` : `-${this.value.toString()}`;
     }
 }
@@ -224,6 +334,15 @@ class BinaryOperation extends StackItem {
         this.lhs = lhs;
         this.rhs = rhs;
         this.operator = operator;
+    }
+
+    /**
+     * 
+     * @param {function(StackItem) => StackItem} fn 
+     */
+    apply(fn) {
+        this.lhs = fn(this.lhs);
+        this.rhs = fn(this.rhs);
     }
 
     /**
@@ -254,12 +373,19 @@ class BinaryOperation extends StackItem {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         var res = "";
         res += this.lhs_needs_parentheses() ? "\\left(" + this.lhs.formatLatex() + "\\right)" : this.lhs.formatLatex();
         res += this.operator;
         res += this.rhs_needs_parentheses() ? "\\left(" + this.rhs.formatLatex() + "\\right)" : this.rhs.formatLatex();
         return res;
+    }
+
+    /**
+     * @returns {Array.<StackItem>}
+     */
+    get children() {
+        return [this.lhs, this.rhs];
     }
 }
 
@@ -445,7 +571,7 @@ class Fraction extends BinaryOperation {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return "\\frac{" + this.lhs.formatLatex()  + "}{" + this.rhs.formatLatex() + "}";
     }
 }
@@ -499,7 +625,7 @@ class Power extends BinaryOperation {
     /**
      * @return {String}
      */
-    formatLatex() {
+    formatInnerLatex() {
         return "{" + addParentheses(this.lhs.formatLatex(), () => this.latex_lhs_needs_parentheses())  + "}^{" + addParentheses(this.rhs.formatLatex(), () => this.latex_rhs_needs_parentheses()) + "}";
     }
 }
@@ -530,6 +656,7 @@ class Equality extends BinaryOperation {
 
 class Stack {
     constructor() {
+        /** @type {Array.<StackItem>} */
         this.items = [];
     }
 
@@ -721,7 +848,7 @@ class StackCmdEval extends StackCmdBase {
             var numerator = parseInt(evalLhs.value/gcd);
             var denominator = parseInt(evalRhs.value/gcd);
             if(denominator === 1) {
-                return Integer(numerator);
+                return new Integer(numerator);
             } else {
                 return new Fraction(new Integer(numerator), new Integer(denominator));              
             }
@@ -753,6 +880,26 @@ class StackCmdEval extends StackCmdBase {
     evalSqrt(item) {
         var evalValue = this.eval(item.value);
         return new Sqrt(evalValue); 
+    }
+}
+
+class StackCmdApply extends StackCmdBase {
+    /**
+     * 
+     * @param {function(StackItem) => StackItem} fn 
+     */
+    constructor(fn) {
+        super();
+        this.fn = fn;
+    }
+
+    /**
+     * 
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(item);
     }
 }
 
@@ -945,10 +1092,165 @@ class StackCmdSwap extends StackCmdBase {
     }
 }
 
+// --------------------------------------------------------------------------------------------------
+// Evaluators
+
+class Evaluator {
+    /**
+     * 
+     * @param {StackItem} item 
+     * @returns {boolean}
+     */
+    canApply(item) {
+        return false;    
+    }
+
+    /**
+     * 
+     * @param {StackItem} item
+     * @returns {StackItem} 
+     */
+    eval(item) {
+        return null;
+    }
+}
+
+class IntegerSumEvaluator {
+    /**
+     * 
+     * @param {StackItem} item 
+     * @returns {boolean}
+     */
+    canApply(item) {
+        if(item instanceof Sum) {
+            if(item.lhs instanceof Integer && item.rhs instanceof Integer) {
+                return true;
+            }
+        }    
+        return false;
+    }
+
+    /**
+     * 
+     * @param {StackItem} item
+     * @returns {StackItem} 
+     */
+    eval(item) {
+        if(this.canApply(item)) {
+            /** @type {Integer} */
+            var lhs = item.lhs; 
+            /** @type {Integer} */
+            var rhs = item.rhs; 
+            return new Integer(lhs.value + rhs.value);
+        } else {
+            return item;
+        }
+    }
+}
+
+class SumIntegerSumEvaluator {
+    /**
+     * 
+     * @param {StackItem} item 
+     * @returns {boolean}
+     */
+    canApply(item) {
+        if(item instanceof Sum) {
+            if(item.lhs instanceof Sum && item.lhs.lhs instanceof Integer && item.lhs.rhs instanceof Integer && item.rhs instanceof Integer) {
+                return true;
+            }
+        }    
+        return false;
+    }
+
+    /**
+     * 
+     * @param {StackItem} item
+     * @returns {StackItem} 
+     */
+    eval(item) {
+        if(this.canApply(item)) {
+            /** @type {Sum} */
+            var sum = item.lhs; 
+            /** @type {Integer} */
+            var rhs = item.rhs; 
+            return new Sum(new Integer(sum.lhs.value), new Integer(sum.rhs.value + rhs.value));
+        } else {
+            return item;
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------------------
+
+class ReplaceVisitor extends StackItemVisitor {
+    /**
+     * 
+     * @param {String} itemId 
+     * @param {StackItem} replaceWith 
+     */
+    constructor(itemId, replaceWith) {
+        super();
+        /** @type {String} */
+        this.itemId = itemId;
+        /** @type {StackItem} */
+        this.replaceWith = replaceWith;
+    }
+    
+    /**
+     * 
+     * @param {StackItem} item 
+     */
+    visit(item) {
+        if(item instanceof UnaryOperation) {
+            this.visitUnary(item);
+        } else if (item instanceof BinaryOperation) {
+            this.visitBinary(item);
+        }
+    }
+
+    /**
+     * 
+     * @param {UnaryOperation} item 
+     */
+    visitUnary(item) {
+        if(item.value.id === this.itemId) {
+            item.value = this.replaceWith;
+        } else {
+            this.visit(item.value);
+        }
+    }
+
+    /**
+     * 
+     * @param {BinaryOperation} item 
+     */
+    visitBinary(item) {
+        console.log("visiting item " + item.toString());
+        console.log(`replace ${this.itemId} with ${this.replaceWith}`);
+        if(item.lhs.id === this.itemId) {
+            item.lhs = this.replaceWith;
+        } else {
+            this.visit(item.lhs);
+        }
+        if(item.rhs.id === this.itemId) {
+            item.rhs = this.replaceWith;
+        } else {
+            this.visit(item.rhs);
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------------------
+
 class Calc {
     constructor() {
+        /** @type {Stack} */
         this.stack = new Stack();
-        this.wordDict = {}; /** @type {Object} */
+        /** @type {Object} */
+        this.wordDict = {};
+        /** @type {Object} */ 
+        this.evaluatorDict = {};
     }
 
     /**
@@ -958,6 +1260,15 @@ class Calc {
      */
     registerWord(key, command) {
         this.wordDict[key] = command;
+    }
+
+    /**
+     * 
+     * @param {string} key 
+     * @param {class} command 
+     */
+    registerEvaluator(key, evaluator) {
+        this.evaluatorDict[key] = evaluator;
     }
 
     /**

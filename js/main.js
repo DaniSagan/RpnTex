@@ -1,3 +1,5 @@
+'use strict';
+
 var calc = new Calc();
 calc.registerWord("eval", StackCmdEval);
 calc.registerWord("+", StackCmdSum);
@@ -14,6 +16,8 @@ calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);
 calc.registerWord("..", StackCmdDrop);
 calc.registerWord("swap", StackCmdSwap);
+calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
+calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
 
 function updateStackTextArea() {
     var text = "";            
@@ -46,7 +50,7 @@ function onTestChange() {
 
 function process() {
     var words = document.getElementById("commandArea").value;
-    for(word of words.split(" ")) {
+    for(var word of words.split(" ")) {
         calc.process(word) /** @type {boolean} */
     }
     updateStackTextArea();
@@ -57,7 +61,51 @@ function process() {
     return false;
 }
 
+// document.getElementById("equationArea").onmouseover = function(e) {
+//     var parent = e.target.parentElement;
+//     console.log(parent);
+//     /** @type {String} */
+//     var id = parent.id;
+//     if(id != "") {
+//         /** @type {StackItem} */
+//         var item = calc.stack.items[0].findById(id);
+//         if(item != null) {
+//             console.log(`${id} -> ${item.id}`);
+//         }
+//     }    
+// }
+
+document.getElementById("equationArea").onclick = function(e) {
+    var selectedItem = e.target.closest(".rpntex-item");
+    if(selectedItem.id != "") {
+        /** @type {StackItem} */
+        var rootItem = calc.stack.items[0];
+        /** @type {StackItem} */
+        var selectedItem = rootItem.findById(selectedItem.id);
+        if(selectedItem != null) {
+            for(var evaluatorKey in calc.evaluatorDict) {
+                /** @type {Evaluator} */
+                var evaluator = new calc.evaluatorDict[evaluatorKey]();
+                if(evaluator.canApply(selectedItem)) {
+                    /** @type {StackItem} */
+                    var evaluatedItem = evaluator.eval(selectedItem);
+                    if(rootItem.id === selectedItem.id) {
+                        calc.stack.pop();
+                        calc.stack.push(evaluatedItem);
+                    } else {
+                        var replaceVisitor = new ReplaceVisitor(selectedItem.id, evaluatedItem);
+                        rootItem.accept(replaceVisitor);
+                    }
+                }              
+            }
+            updateStackTextArea();
+            updateEquationText();
+            MathJax.typeset(); 
+        }
+    } 
+}
+
 window.MathJax = {
-    loader: {load: ['[tex]/color']},
-    tex: {packages: {'[+]': ['color']}}
+    loader: {load: ['[tex]/color', '[tex]/html']},
+    tex: {packages: {'[+]': ['color', 'html']}}
 };
