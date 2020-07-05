@@ -664,7 +664,6 @@ class Stack {
      * @param {StackItem} item
      */
     push(item) {
-        console.log("Pushing item " + item.toString() + " to stack");
         this.items.unshift(item);
     }
 
@@ -1113,6 +1112,15 @@ class Evaluator {
     eval(item) {
         return null;
     }
+
+    /**
+     * 
+     * @param {StackItem} item 
+     * @return {String}
+     */
+    getDescription(item) {
+        return "Base evaluator";
+    }
 }
 
 class IntegerSumEvaluator {
@@ -1145,6 +1153,15 @@ class IntegerSumEvaluator {
         } else {
             return item;
         }
+    }
+
+    /**
+     * 
+     * @param {StackItem} item 
+     * @return {String}
+     */
+    getDescription(item) {
+        return "Sum integers";
     }
 }
 
@@ -1226,8 +1243,6 @@ class ReplaceVisitor extends StackItemVisitor {
      * @param {BinaryOperation} item 
      */
     visitBinary(item) {
-        console.log("visiting item " + item.toString());
-        console.log(`replace ${this.itemId} with ${this.replaceWith}`);
         if(item.lhs.id === this.itemId) {
             item.lhs = this.replaceWith;
         } else {
@@ -1251,6 +1266,8 @@ class Calc {
         this.wordDict = {};
         /** @type {Object} */ 
         this.evaluatorDict = {};
+        /** @type {StackItem} */
+        this.selectedItem = null;
     }
 
     /**

@@ -11,14 +11,18 @@
         <h1>Rpn\Tex</h1>
     </header>
     <main>
-        <div class="wrap">
-            <div id="equationArea">
-                <p id="equationText"></p>
+        <div class="container">
+            <div class="menu" id="menu">
             </div>
-            <textarea id="stackArea" readonly="true" rows="10"></textarea>
-            <br>
-            <input id="commandArea" type="text" placeholder=">>" onkeypress="onTestChange();"></textarea>
-            <button type="button" onclick="process();">Execute</button>
+            <div class="wrap">
+                <div id="equationArea">
+                    <p id="equationText"></p>
+                </div>
+                <textarea id="stackArea" readonly="true" rows="10"></textarea>
+                <br>
+                <input id="commandArea" type="text" placeholder=">>" onkeypress="onTestChange();"></textarea>
+                <button type="button" onclick="process();">Execute</button>
+            </div>
         </div>
     </main>
     <footer></footer>
