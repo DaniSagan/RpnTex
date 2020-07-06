@@ -12,6 +12,8 @@ calc.registerWord("pow", StackCmdPower);
 calc.registerWord("inv", StackCmdInv);
 calc.registerWord("sqrt", StackCmdSqrt);
 calc.registerWord("neg", StackCmdNeg);
+calc.registerWord("diff", StackCmdDifferential);
+calc.registerWord("integral", StackCmdIndefiniteIntegral);
 calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);
 calc.registerWord("..", StackCmdDrop);
