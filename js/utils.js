@@ -23,6 +23,21 @@ function isInteger(value) {
     return false;
 }
 
+/**
+ * 
+ * @param {String} str
+ * @returns {boolean} 
+ */
+function isFloat(value) {
+    let parsedValue = parseFloat(value, 10);
+    return parsedValue !== NaN;
+}
+
+/**
+ * 
+ * @param {number} n1 
+ * @param {number} n2 
+ */
 function greatestCommonDivisor(n1, n2) {
     if (n2 === 0) {  
         return n1 
