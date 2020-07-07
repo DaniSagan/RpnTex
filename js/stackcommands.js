@@ -379,7 +379,24 @@ class StackCmdIndefiniteIntegral extends StackCmdBase {
     execute(stack) {
         var itemDifferential = stack.pop();
         var itemValue = stack.pop();
-        stack.push(new Integral(itemValue, itemDifferential, null));
+        stack.push(new Integral(itemValue, itemDifferential, null, null));
+    }
+}
+
+class StackCmdDefiniteIntegral extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var itemDifferential = stack.pop();
+        var itemValue = stack.pop();
+        var itemSuperScript = stack.pop();
+        var itemSubscript = stack.pop();
+        stack.push(new Integral(itemValue, itemDifferential, itemSubscript, itemSuperScript));
     }
 }
 

@@ -658,7 +658,7 @@ class Integral extends SuperSubScriptOperation {
             res += `_{${this.subscript}}`;
         }
         if(this.superscript != null) {
-            res += `_{${this.superscript}}`;
+            res += `^{${this.superscript}}`;
         }
         res += ` ${this.value.formatLatex()} \\mathrm{d}${this.differential.formatLatex()}`;
         return res;

@@ -14,6 +14,7 @@ calc.registerWord("sqrt", StackCmdSqrt);
 calc.registerWord("neg", StackCmdNeg);
 calc.registerWord("diff", StackCmdDifferential);
 calc.registerWord("integral", StackCmdIndefiniteIntegral);
+calc.registerWord("defintegral", StackCmdDefiniteIntegral);
 calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);
 calc.registerWord("..", StackCmdDrop);
