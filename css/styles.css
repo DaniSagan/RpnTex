@@ -1,82 +1,172 @@
-header {
-  background-color: #312A3F;
-  padding: 5px;
-  padding-left: 20px;
+@media only screen and (orientation: landscape) {
+  header {
+    background-color: #312A3F;
+    padding: 5px;
+    padding-left: 20px;
+  }
+  
+  header h1 {
+    color: antiquewhite;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #eeeeee;
+  }
+  
+  .container {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 400px;
+  }
+  
+  .menu {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .wrap {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .keyboard {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  #equationArea {
+    min-height: 100px;
+    vertical-align: middle;
+    background-color: #ffffff;
+    padding-top: 20px;
+    font-size: 1em;
+  }
+  
+  #stackArea {
+    -moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    display:block;
+    width:100%;
+    margin:0;
+    padding:4px;
+    background:#EEF;
+    border:1px solid #333;
+    overflow-y:auto;
+    overflow-x:hidden;
+    font-family: monospace;
+    resize: none;
+  }
+  
+  .menu button {
+    background-color: #312A3F; 
+    border: 1px solid #7f6da3; 
+    color: white; 
+    padding: 10px 24px; 
+    cursor: pointer; 
+    width: 100%; 
+    display: block; 
+  }
+  
+  .button-w1 {
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.8em;
+  }
+  
+  .button-w2 {
+    min-width: 80px;
+    height: 40px;
+    font-size: 0.8em;
+  }
+  
 }
 
-header h1 {
-  color: antiquewhite;
+@media only screen and (orientation: portrait) {
+  header {
+    background-color: #312A3F;
+    padding: 5px;
+    padding-left: 20px;
+  }
+  
+  header h1 {
+    color: antiquewhite;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #eeeeee;
+  }
+  
+  .container {
+    margin: 0 auto;
+  }
+  
+  .menu {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .wrap {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .keyboard {
+    margin: 0 auto;
+    width: 100%;
+    min-width: 400px;
+    max-width: 400px;
+  }
+  
+  #equationArea {
+    min-height: 100px;
+    vertical-align: middle;
+    background-color: #ffffff;
+    padding-top: 20px;
+    font-size: 1em;
+  }
+  
+  #stackArea {
+    -moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    display:block;
+    width:100%;
+    margin:0;
+    padding:4px;
+    background:#EEF;
+    border:1px solid #333;
+    overflow-y:auto;
+    overflow-x:hidden;
+    font-family: monospace;
+    resize: none;
+  }
+  
+  .menu button {
+    background-color: #312A3F; 
+    border: 1px solid #7f6da3; 
+    color: white; 
+    padding: 10px 24px; 
+    cursor: pointer; 
+    width: 100%; 
+    display: block; 
+  }
+  
+  .button-w1 {
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.8em;
+  }
+  
+  .button-w2 {
+    min-width: 80px;
+    height: 40px;
+    font-size: 0.8em;
+  }
+  
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #eeeeee;
-}
-
-.container {
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: auto 200px;
-}
-
-.menu {
-  margin: 0 auto;
-  width: 100%;
-}
-
-.wrap {
-  margin: 0 auto;
-  width: 100%;
-}
-
-.keyboard {
-  margin: 0 auto;
-  width: 100%;
-}
-
-#equationArea {
-  min-height: 100px;
-  vertical-align: middle;
-  background-color: #ffffff;
-  padding-top: 20px;
-  font-size: 1em;
-}
-
-#stackArea {
-  -moz-box-sizing:border-box;
-  -webkit-box-sizing:border-box;
-  box-sizing:border-box;
-  display:block;
-  width:100%;
-  margin:0;
-  padding:4px;
-  background:#EEF;
-  border:1px solid #333;
-  overflow-y:auto;
-  overflow-x:hidden;
-  font-family: monospace;
-  resize: none;
-}
-
-.menu button {
-  background-color: #312A3F; 
-  border: 1px solid #7f6da3; 
-  color: white; 
-  padding: 10px 24px; 
-  cursor: pointer; 
-  width: 100%; 
-  display: block; 
-}
-
-.button-w1 {
-  min-width: 40px;
-  height: 40px;
-  font-size: 0.8em;
-}
-
-.button-w2 {
-  min-width: 80px;
-  height: 40px;
-  font-size: 0.8em;
-}
