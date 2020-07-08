@@ -23,9 +23,9 @@ calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
 
 class KeyboardButton {
-    constructor(textToShow, textToAdd, className) {
+    constructor(textToShow, fnToExecute, className) {
         this.textToShow = textToShow;
-        this.textToAdd = textToAdd;
+        this.fnToExecute = fnToExecute;
         this.className = className;
     }
 }
@@ -40,7 +40,9 @@ function updateStackTextArea() {
     for(let k = calc.stack.count() - 1; k >= 0; k--) {
         text = text.concat("[" + k.toString() + "]    " + calc.stack.get(k).toString() + "\n");
     }
-    document.getElementById("stackArea").value = text;
+    let stackArea = document.getElementById("stackArea");
+    stackArea.value = text;
+    stackArea.scrollTop = stackArea.scrollHeight;;
 }
 
 function updateEquationText() {
@@ -69,9 +71,14 @@ function process() {
     }
     updateStackTextArea();
     updateEquationText();
-    updateMenu();
-    MathJax.typeset();
+    // updateMenu();
     document.getElementById("commandArea").value = "";
+    MathJax.typeset();
+    return false;
+}
+
+function executeButtonOnClick() {
+    process();
     document.getElementById("commandArea").focus();
     return false;
 }
@@ -129,35 +136,43 @@ function updateMenu() {
     } 
 }
 
+/**
+ * 
+ * @param {String} command 
+ */
+function writeCommand(command) {
+    let commandArea = document.getElementById("commandArea");
+    commandArea.value += command;
+}
+
 function updateKeyboard() {
     let keyboardDiv = document.getElementById("keyboard");
     while(keyboardDiv.firstChild) {
         keyboardDiv.removeChild(keyboardDiv.firstChild);
     }
     let keyboardButtons = [
-        new KeyboardButton("9", "9", "button-w1"), 
-        new KeyboardButton("8", "8", "button-w1"), 
-        new KeyboardButton("7", "7", "button-w1"),
-        new KeyboardButton("+", "+", "button-w1"),
-        new KeyboardButton("-", "-", "button-w1"),
-        new KeyboardButton("6", "6", "button-w1"),
-        new KeyboardButton("5", "5", "button-w1"),
-        new KeyboardButton("4", "4", "button-w1"),
-        new KeyboardButton("*", "*", "button-w1"),
-        new KeyboardButton("/", "/", "button-w1"),
-        new KeyboardButton("3", "3", "button-w1"),
-        new KeyboardButton("2", "2", "button-w1"),
-        new KeyboardButton("1", "1", "button-w1"),
-        new KeyboardButton("space", " ", "button-w2"),
-        new KeyboardButton("0", "0", "button-w1")];
+        new KeyboardButton("9", () => writeCommand("9"), "button-w1"), 
+        new KeyboardButton("8", () => writeCommand("8"), "button-w1"), 
+        new KeyboardButton("7", () => writeCommand("7"), "button-w1"),
+        new KeyboardButton("+", () => writeCommand("+"), "button-w1"),
+        new KeyboardButton("-", () => writeCommand("-"), "button-w1"),
+        new KeyboardButton("6", () => writeCommand("6"), "button-w1"),
+        new KeyboardButton("5", () => writeCommand("5"), "button-w1"),
+        new KeyboardButton("4", () => writeCommand("4"), "button-w1"),
+        new KeyboardButton("*", () => writeCommand("*"), "button-w1"),
+        new KeyboardButton("/", () => writeCommand("/"), "button-w1"),
+        new KeyboardButton("3", () => writeCommand("3"), "button-w1"),
+        new KeyboardButton("2", () => writeCommand("2"), "button-w1"),
+        new KeyboardButton("1", () => writeCommand("1"), "button-w1"),
+        new KeyboardButton("space", () => writeCommand(" "), "button-w2"),
+        new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
+        new KeyboardButton(".", () => writeCommand("."), "button-w1"),
+        new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
+        new KeyboardButton("exe", () => process(), "button-w2")];
     for(let keyboardButton of keyboardButtons) {
         let button = document.createElement('button');
         button.innerText = `${keyboardButton.textToShow}`;
-        button.onclick = function() {
-            let commandArea = document.getElementById("commandArea");
-            commandArea.value += keyboardButton.textToAdd;
-            console.log(commandArea);
-        };
+        button.onclick = keyboardButton.fnToExecute;
         button.className = keyboardButton.className;
         keyboardDiv.appendChild(button);
     }

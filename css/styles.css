@@ -17,7 +17,7 @@ body {
 .container {
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 200px auto 200px;
+  grid-template-columns: auto 200px;
 }
 
 .menu {
