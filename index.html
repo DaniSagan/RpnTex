@@ -6,7 +6,7 @@
   <title>RpnTex</title>
   <link rel="stylesheet" href="css/styles.css" type="text/css">
 </head>
-<body>
+<body onload="init()">
     <header>
         <h1>Rpn\Tex</h1>
     </header>
@@ -19,9 +19,10 @@
                     <p id="equationText"></p>
                 </div>
                 <textarea id="stackArea" readonly="true" rows="10"></textarea>
-                <br>
-                <input id="commandArea" type="text" placeholder=">>" onkeypress="onTestChange();"></textarea>
+                <input id="commandArea" type="text" placeholder=">>" onkeypress="onTestChange();"></input>
                 <button type="button" onclick="process();">Execute</button>
+            </div>
+            <div class="keyboard" id="keyboard">
             </div>
         </div>
     </main>

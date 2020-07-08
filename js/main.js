@@ -22,6 +22,19 @@ calc.registerWord("swap", StackCmdSwap);
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
 
+class KeyboardButton {
+    constructor(textToShow, textToAdd, className) {
+        this.textToShow = textToShow;
+        this.textToAdd = textToAdd;
+        this.className = className;
+    }
+}
+
+function init() {
+    updateKeyboard();
+    MathJax.typeset();
+}
+
 function updateStackTextArea() {
     let text = "";            
     for(let k = calc.stack.count() - 1; k >= 0; k--) {
@@ -114,6 +127,40 @@ function updateMenu() {
             }              
         }
     } 
+}
+
+function updateKeyboard() {
+    let keyboardDiv = document.getElementById("keyboard");
+    while(keyboardDiv.firstChild) {
+        keyboardDiv.removeChild(keyboardDiv.firstChild);
+    }
+    let keyboardButtons = [
+        new KeyboardButton("9", "9", "button-w1"), 
+        new KeyboardButton("8", "8", "button-w1"), 
+        new KeyboardButton("7", "7", "button-w1"),
+        new KeyboardButton("+", "+", "button-w1"),
+        new KeyboardButton("-", "-", "button-w1"),
+        new KeyboardButton("6", "6", "button-w1"),
+        new KeyboardButton("5", "5", "button-w1"),
+        new KeyboardButton("4", "4", "button-w1"),
+        new KeyboardButton("*", "*", "button-w1"),
+        new KeyboardButton("/", "/", "button-w1"),
+        new KeyboardButton("3", "3", "button-w1"),
+        new KeyboardButton("2", "2", "button-w1"),
+        new KeyboardButton("1", "1", "button-w1"),
+        new KeyboardButton("space", " ", "button-w2"),
+        new KeyboardButton("0", "0", "button-w1")];
+    for(let keyboardButton of keyboardButtons) {
+        let button = document.createElement('button');
+        button.innerText = `${keyboardButton.textToShow}`;
+        button.onclick = function() {
+            let commandArea = document.getElementById("commandArea");
+            commandArea.value += keyboardButton.textToAdd;
+            console.log(commandArea);
+        };
+        button.className = keyboardButton.className;
+        keyboardDiv.appendChild(button);
+    }
 }
 
 document.getElementById("equationArea").onmouseover = function(e) {
