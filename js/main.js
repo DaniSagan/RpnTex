@@ -67,11 +67,26 @@ function onTestChange() {
 function process() {
     let words = document.getElementById("commandArea").value;
     for(let word of words.split(" ")) {
-        calc.process(word) /** @type {boolean} */
+        if(word != "") {
+            calc.process(word) /** @type {boolean} */
+        }
     }
     updateStackTextArea();
     updateEquationText();
     // updateMenu();
+    document.getElementById("commandArea").value = "";
+    MathJax.typeset();
+    return false;
+}
+
+/**
+ * 
+ * @param {String} word 
+ */
+function processWord(word) {
+    calc.process(word)
+    updateStackTextArea();
+    updateEquationText();
     document.getElementById("commandArea").value = "";
     MathJax.typeset();
     return false;
@@ -168,7 +183,9 @@ function updateKeyboard() {
         new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
         new KeyboardButton(".", () => writeCommand("."), "button-w1"),
         new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
-        new KeyboardButton("exe", () => process(), "button-w2")];
+        new KeyboardButton("exe", () => process(), "button-w2"),
+        new KeyboardButton("drop", () => processWord("."), "button-w2"),
+        new KeyboardButton("dup", () => process(".."), "button-w2")];
     for(let keyboardButton of keyboardButtons) {
         let button = document.createElement('button');
         button.innerText = `${keyboardButton.textToShow}`;
