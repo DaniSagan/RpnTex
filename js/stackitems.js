@@ -281,6 +281,66 @@ class Differential extends UnaryOperation {
     }
 }
 
+class Sin extends UnaryOperation {
+    constructor(value) {
+        super(value);
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `sin(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\sin\\left(${this.value.formatLatex()}\\right)`
+    }
+}
+
+class Cos extends UnaryOperation {
+    constructor(value) {
+        super(value);
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `cos(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\cos\\left(${this.value.formatLatex()}\\right)`
+    }
+}
+
+class Tan extends UnaryOperation {
+    constructor(value) {
+        super(value);
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `tan(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\tan\\left(${this.value.formatLatex()}\\right)`
+    }
+}
+
 class BinaryOperation extends StackItem {
     /**
      * @param {StackItem} lhs

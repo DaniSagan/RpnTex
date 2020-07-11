@@ -339,6 +339,48 @@ class StackCmdNeg extends StackCmdBase {
     }
 }
 
+class StackCmdSin extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Sin(item));
+    }
+}
+
+class StackCmdCos extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Cos(item));
+    }
+}
+
+class StackCmdTan extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop();
+        stack.push(new Tan(item));
+    }
+}
+
 class StackCmdEquality extends StackCmdBase {
     constructor() {
         super();

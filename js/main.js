@@ -12,6 +12,9 @@ calc.registerWord("pow", StackCmdPower);
 calc.registerWord("inv", StackCmdInv);
 calc.registerWord("sqrt", StackCmdSqrt);
 calc.registerWord("neg", StackCmdNeg);
+calc.registerWord("sin", StackCmdSin);
+calc.registerWord("cos", StackCmdCos);
+calc.registerWord("tan", StackCmdTan);
 calc.registerWord("diff", StackCmdDifferential);
 calc.registerWord("integral", StackCmdIndefiniteIntegral);
 calc.registerWord("defintegral", StackCmdDefiniteIntegral);
@@ -84,10 +87,14 @@ function process() {
  * @param {String} word 
  */
 function processWord(word) {
+    let commandArea = document.getElementById("commandArea");
+    if(commandArea.value != "") {
+        process();
+    }
     calc.process(word)
     updateStackTextArea();
     updateEquationText();
-    document.getElementById("commandArea").value = "";
+    //document.getElementById("commandArea").value = "";
     MathJax.typeset();
     return false;
 }
@@ -175,17 +182,35 @@ function updateKeyboard() {
         new KeyboardButton("6", () => writeCommand("6"), "button-w1"),
         new KeyboardButton("7", () => writeCommand("7"), "button-w1"),
         new KeyboardButton("8", () => writeCommand("8"), "button-w1"), 
-        new KeyboardButton("9", () => writeCommand("9"), "button-w1"), 
+        new KeyboardButton("9", () => writeCommand("9"), "button-w1"),
+
         new KeyboardButton(".", () => writeCommand("."), "button-w1"),
         new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
-        new KeyboardButton("space", () => writeCommand(" "), "button-w2"),
-        new KeyboardButton("+", () => writeCommand("+"), "button-w1"),
-        new KeyboardButton("-", () => writeCommand("-"), "button-w1"),
-        new KeyboardButton("*", () => writeCommand("*"), "button-w1"),
-        new KeyboardButton("/", () => writeCommand("/"), "button-w1"),
+        new KeyboardButton("␣", () => writeCommand(" "), "button-w2"),
+        new KeyboardButton("+", () => processWord("+"), "button-w1"),
+        new KeyboardButton("-", () => processWord("-"), "button-w1"),
+        new KeyboardButton("*", () => processWord("*"), "button-w1"),
+        new KeyboardButton("/", () => processWord("/"), "button-w1"),
         new KeyboardButton("exe", () => process(), "button-w2"),
-        new KeyboardButton("drop", () => processWord("."), "button-w2"),
-        new KeyboardButton("dup", () => process(".."), "button-w2")];
+
+        new KeyboardButton("drop", () => processWord(".."), "button-w2"),
+        new KeyboardButton("dup", () => processWord("."), "button-w2"),
+        new KeyboardButton("x", () => processWord("x"), "button-w1"),
+        new KeyboardButton("y", () => processWord("y"), "button-w1"),
+        new KeyboardButton("z", () => processWord("z"), "button-w1"),
+        new KeyboardButton("d", () => processWord("diff"), "button-w1"),
+        new KeyboardButton("∫", () => processWord("integral"), "button-w1"),
+        new KeyboardButton("√", () => processWord("sqrt"), "button-w1"),
+
+        new KeyboardButton("^", () => processWord("pow"), "button-w1"),
+        new KeyboardButton("=", () => processWord("="), "button-w1"),
+        new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
+        new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
+        new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
+        new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
+        
+        new KeyboardButton("neg", () => processWord("neg"), "button-w2")
+    ];
     for(let keyboardButton of keyboardButtons) {
         let button = document.createElement('button');
         button.innerText = `${keyboardButton.textToShow}`;
