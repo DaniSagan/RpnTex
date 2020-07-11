@@ -33,6 +33,22 @@ class KeyboardButton {
     }
 }
 
+class KeyboardGroup {
+    /**
+     * 
+     * @param {String} name 
+     * @param {Array.<KeyboardButton>} buttons
+     */
+    constructor(name, buttons) {
+        /** @type {String} */
+        this.name = name;
+        /** @type {boolean} */
+        this.visible = true;
+        /** @type {Array.<KeyboardButton>} */
+        this.buttons = buttons;    
+    }
+}
+
 function init() {
     updateKeyboard();
     MathJax.typeset();
@@ -167,56 +183,100 @@ function writeCommand(command) {
     commandArea.value += command;
 }
 
+function backspace() {
+    let commandArea = document.getElementById("commandArea");
+    commandArea.value = commandArea.value.substring(0, commandArea.value.length - 1);;
+}
+
 function updateKeyboard() {
     let keyboardDiv = document.getElementById("keyboard");
     while(keyboardDiv.firstChild) {
         keyboardDiv.removeChild(keyboardDiv.firstChild);
     }
-    let keyboardButtons = [
-        new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
-        new KeyboardButton("1", () => writeCommand("1"), "button-w1"),
-        new KeyboardButton("2", () => writeCommand("2"), "button-w1"),
-        new KeyboardButton("3", () => writeCommand("3"), "button-w1"),
-        new KeyboardButton("4", () => writeCommand("4"), "button-w1"),
-        new KeyboardButton("5", () => writeCommand("5"), "button-w1"),
-        new KeyboardButton("6", () => writeCommand("6"), "button-w1"),
-        new KeyboardButton("7", () => writeCommand("7"), "button-w1"),
-        new KeyboardButton("8", () => writeCommand("8"), "button-w1"), 
-        new KeyboardButton("9", () => writeCommand("9"), "button-w1"),
+    let keyboardGroups = [
+        new KeyboardGroup("numeric", [
+            new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
+            new KeyboardButton("1", () => writeCommand("1"), "button-w1"),
+            new KeyboardButton("2", () => writeCommand("2"), "button-w1"),
+            new KeyboardButton("3", () => writeCommand("3"), "button-w1"),
+            new KeyboardButton("4", () => writeCommand("4"), "button-w1"),
+            new KeyboardButton("5", () => writeCommand("5"), "button-w1"),
+            new KeyboardButton("6", () => writeCommand("6"), "button-w1"),
+            new KeyboardButton("7", () => writeCommand("7"), "button-w1"),
+            new KeyboardButton("8", () => writeCommand("8"), "button-w1"), 
+            new KeyboardButton("9", () => writeCommand("9"), "button-w1"),
 
-        new KeyboardButton(".", () => writeCommand("."), "button-w1"),
-        new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
-        new KeyboardButton("␣", () => writeCommand(" "), "button-w2"),
-        new KeyboardButton("+", () => processWord("+"), "button-w1"),
-        new KeyboardButton("-", () => processWord("-"), "button-w1"),
-        new KeyboardButton("*", () => processWord("*"), "button-w1"),
-        new KeyboardButton("/", () => processWord("/"), "button-w1"),
-        new KeyboardButton("exe", () => process(), "button-w2"),
+            new KeyboardButton(".", () => writeCommand("."), "button-w1"),
+            new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
+            new KeyboardButton("␣", () => writeCommand(" "), "button-w2"),
+            new KeyboardButton("+", () => processWord("+"), "button-w1"),
+            new KeyboardButton("-", () => processWord("-"), "button-w1"),
+            new KeyboardButton("*", () => processWord("*"), "button-w1"),
+            new KeyboardButton("/", () => processWord("/"), "button-w1"),
+            new KeyboardButton("exe", () => process(), "button-w2"),
 
-        new KeyboardButton("drop", () => processWord(".."), "button-w2"),
-        new KeyboardButton("dup", () => processWord("."), "button-w2"),
-        new KeyboardButton("x", () => processWord("x"), "button-w1"),
-        new KeyboardButton("y", () => processWord("y"), "button-w1"),
-        new KeyboardButton("z", () => processWord("z"), "button-w1"),
-        new KeyboardButton("d", () => processWord("diff"), "button-w1"),
-        new KeyboardButton("∫", () => processWord("integral"), "button-w1"),
-        new KeyboardButton("√", () => processWord("sqrt"), "button-w1"),
+            new KeyboardButton("drop", () => processWord(".."), "button-w2"),
+            new KeyboardButton("dup", () => processWord("."), "button-w2"),
+            new KeyboardButton("x", () => processWord("x"), "button-w1"),
+            new KeyboardButton("y", () => processWord("y"), "button-w1"),
+            new KeyboardButton("z", () => processWord("z"), "button-w1"),
+            new KeyboardButton("d", () => processWord("diff"), "button-w1"),
+            new KeyboardButton("∫", () => processWord("integral"), "button-w1"),
+            new KeyboardButton("√", () => processWord("sqrt"), "button-w1"),
 
-        new KeyboardButton("^", () => processWord("pow"), "button-w1"),
-        new KeyboardButton("=", () => processWord("="), "button-w1"),
-        new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
-        new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
-        new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
-        new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
-        
-        new KeyboardButton("neg", () => processWord("neg"), "button-w2")
+            new KeyboardButton("^", () => processWord("pow"), "button-w1"),
+            new KeyboardButton("=", () => processWord("="), "button-w1"),
+            new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
+            new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
+            new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
+            new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
+
+            new KeyboardButton("neg", () => processWord("neg"), "button-w2")
+        ]),
+        new KeyboardGroup("alphabetic", [
+            new KeyboardButton("q", () => writeCommand("q"), "button-w1"),
+            new KeyboardButton("w", () => writeCommand("w"), "button-w1"),
+            new KeyboardButton("e", () => writeCommand("e"), "button-w1"),
+            new KeyboardButton("r", () => writeCommand("r"), "button-w1"),
+            new KeyboardButton("t", () => writeCommand("t"), "button-w1"),
+            new KeyboardButton("y", () => writeCommand("y"), "button-w1"),
+            new KeyboardButton("u", () => writeCommand("u"), "button-w1"),
+            new KeyboardButton("i", () => writeCommand("i"), "button-w1"),
+            new KeyboardButton("o", () => writeCommand("o"), "button-w1"), 
+            new KeyboardButton("p", () => writeCommand("p"), "button-w1"),
+
+            new KeyboardButton("a", () => writeCommand("a"), "button-w1"),
+            new KeyboardButton("s", () => writeCommand("s"), "button-w1"),
+            new KeyboardButton("d", () => writeCommand("d"), "button-w1"),
+            new KeyboardButton("f", () => writeCommand("f"), "button-w1"),
+            new KeyboardButton("g", () => writeCommand("g"), "button-w1"),
+            new KeyboardButton("h", () => writeCommand("h"), "button-w1"),
+            new KeyboardButton("j", () => writeCommand("j"), "button-w1"),
+            new KeyboardButton("k", () => writeCommand("k"), "button-w1"),
+            new KeyboardButton("l", () => writeCommand("l"), "button-w1"), 
+            new KeyboardButton("ñ", () => writeCommand("ñ"), "button-w1"),
+
+            new KeyboardButton("z", () => writeCommand("z"), "button-w1"),
+            new KeyboardButton("x", () => writeCommand("x"), "button-w1"),
+            new KeyboardButton("c", () => writeCommand("c"), "button-w1"),
+            new KeyboardButton("v", () => writeCommand("v"), "button-w1"),
+            new KeyboardButton("b", () => writeCommand("b"), "button-w1"),
+            new KeyboardButton("n", () => writeCommand("n"), "button-w1"),
+            new KeyboardButton("m", () => writeCommand("m"), "button-w1"),
+            new KeyboardButton("⌫", () => backspace(), "button-w2")
+        ]),
     ];
-    for(let keyboardButton of keyboardButtons) {
-        let button = document.createElement('button');
-        button.innerText = `${keyboardButton.textToShow}`;
-        button.onclick = keyboardButton.fnToExecute;
-        button.className = keyboardButton.className;
-        keyboardDiv.appendChild(button);
+    for(let keyboardGroup of keyboardGroups)
+    {
+        let keyboardGroupDiv = document.createElement('div');
+        for(let keyboardButton of keyboardGroup.buttons) {
+            let button = document.createElement('button');
+            button.innerText = `${keyboardButton.textToShow}`;
+            button.onclick = keyboardButton.fnToExecute;
+            button.className = keyboardButton.className;
+            keyboardGroupDiv.appendChild(button);
+        }
+        keyboardDiv.appendChild(keyboardGroupDiv);
     }
 }
 
