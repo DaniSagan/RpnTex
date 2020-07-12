@@ -25,30 +25,6 @@ calc.registerWord("swap", StackCmdSwap);
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
 
-class KeyboardButton {
-    constructor(textToShow, fnToExecute, className) {
-        this.textToShow = textToShow;
-        this.fnToExecute = fnToExecute;
-        this.className = className;
-    }
-}
-
-class KeyboardGroup {
-    /**
-     * 
-     * @param {String} name 
-     * @param {Array.<KeyboardButton>} buttons
-     */
-    constructor(name, buttons) {
-        /** @type {String} */
-        this.name = name;
-        /** @type {boolean} */
-        this.visible = true;
-        /** @type {Array.<KeyboardButton>} */
-        this.buttons = buttons;    
-    }
-}
-
 function init() {
     updateKeyboard();
     MathJax.typeset();

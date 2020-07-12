@@ -281,64 +281,94 @@ class Differential extends UnaryOperation {
     }
 }
 
-class Sin extends UnaryOperation {
-    constructor(value) {
+class UnaryFunction extends UnaryOperation {
+    /**
+     * 
+     * @param {StackItem} value 
+     * @param {String} functionName 
+     */
+    constructor(value, functionName) {
         super(value);
+        this.functionName = functionName;
     }
 
     /**
      * @return {String}
      */
     toString() {
-        return `sin(${this.value.toString()})`;
+        return `${this.functionName}(${this.value.toString()})`;
     }
 
     /**
      * @return {String}
      */
     formatInnerLatex() {
-        return `\\sin\\left(${this.value.formatLatex()}\\right)`
+        return `\\${this.functionName}\\left(${this.value.formatLatex()}\\right)`
     }
 }
 
-class Cos extends UnaryOperation {
+class Sin extends UnaryFunction {
+    /**
+     * 
+     * @param {StackItem} value 
+     */
     constructor(value) {
-        super(value);
+        super(value, "sin");
     }
 
-    /**
-     * @return {String}
-     */
-    toString() {
-        return `cos(${this.value.toString()})`;
-    }
+    // /**
+    //  * @return {String}
+    //  */
+    // toString() {
+    //     return `sin(${this.value.toString()})`;
+    // }
 
-    /**
-     * @return {String}
-     */
-    formatInnerLatex() {
-        return `\\cos\\left(${this.value.formatLatex()}\\right)`
-    }
+    // /**
+    //  * @return {String}
+    //  */
+    // formatInnerLatex() {
+    //     return `\\sin\\left(${this.value.formatLatex()}\\right)`
+    // }
 }
 
-class Tan extends UnaryOperation {
+class Cos extends UnaryFunction {
     constructor(value) {
-        super(value);
+        super(value, "cos");
     }
 
-    /**
-     * @return {String}
-     */
-    toString() {
-        return `tan(${this.value.toString()})`;
+    // /**
+    //  * @return {String}
+    //  */
+    // toString() {
+    //     return `cos(${this.value.toString()})`;
+    // }
+
+    // /**
+    //  * @return {String}
+    //  */
+    // formatInnerLatex() {
+    //     return `\\cos\\left(${this.value.formatLatex()}\\right)`
+    // }
+}
+
+class Tan extends UnaryFunction {
+    constructor(value) {
+        super(value, "tan");
     }
 
-    /**
-     * @return {String}
-     */
-    formatInnerLatex() {
-        return `\\tan\\left(${this.value.formatLatex()}\\right)`
-    }
+    // /**
+    //  * @return {String}
+    //  */
+    // toString() {
+    //     return `tan(${this.value.toString()})`;
+    // }
+
+    // /**
+    //  * @return {String}
+    //  */
+    // formatInnerLatex() {
+    //     return `\\tan\\left(${this.value.formatLatex()}\\right)`
+    // }
 }
 
 class BinaryOperation extends StackItem {
@@ -420,37 +450,48 @@ class Sum extends BinaryOperation {
      * @returns {boolean}
      */
     lhs_needs_parentheses() {
-        if(this.lhs instanceof Integer || 
-           this.lhs instanceof Real || 
-           this.lhs instanceof Sqrt || 
-           this.lhs instanceof Sum || 
-           this.lhs instanceof Subtraction || 
-           this.lhs instanceof Variable || 
-           this.lhs instanceof Multiplication ||
-           this.lhs instanceof Fraction ||
-           this.lhs instanceof Power ||
-           this.lhs instanceof Abs) {
-            return false;
-        }
-        return true;
+        // if(this.lhs instanceof Integer || 
+        //    this.lhs instanceof Real || 
+        //    this.lhs instanceof Sqrt || 
+        //    this.lhs instanceof Sum || 
+        //    this.lhs instanceof Subtraction || 
+        //    this.lhs instanceof Variable || 
+        //    this.lhs instanceof Multiplication ||
+        //    this.lhs instanceof Fraction ||
+        //    this.lhs instanceof Power ||
+        //    this.lhs instanceof Abs) {
+        //     return false;
+        // }
+        // return true;
+        return false;
     }
 
     /**
      * @returns {boolean}
      */
     rhs_needs_parentheses() {
-        if(this.rhs instanceof Integer || 
-           this.rhs instanceof Real ||
-           this.rhs instanceof Sqrt ||  
-           this.rhs instanceof Sum || 
-           this.rhs instanceof Variable ||
-           this.rhs instanceof Multiplication ||
-           this.rhs instanceof Fraction ||
-           this.rhs instanceof Power ||
-           this.rhs instanceof Abs) {
-            return false;
+        // if(this.rhs instanceof Integer || 
+        //    this.rhs instanceof Real ||
+        //    this.rhs instanceof Sqrt ||  
+        //    this.rhs instanceof Sum || 
+        //    this.rhs instanceof Variable ||
+        //    this.rhs instanceof Multiplication ||
+        //    this.rhs instanceof Fraction ||
+        //    this.rhs instanceof Power ||
+        //    this.rhs instanceof Abs) {
+        //     return false;
+        // }
+        // return true;
+        if(this.rhs instanceof Neg) {
+            return true;
         }
-        return true;
+        if(this.rhs instanceof Integer && this.rhs.value < 0) {
+            return true;
+        }
+        if(this.rhs instanceof Real && this.rhs.value < 0) {
+            return true;
+        }
+        return false;
     }
 }
 
@@ -648,7 +689,11 @@ class Power extends BinaryOperation {
      * @return {String}
      */
     formatInnerLatex() {
-        return "{" + addParentheses(this.lhs.formatLatex(), () => this.latex_lhs_needs_parentheses())  + "}^{" + addParentheses(this.rhs.formatLatex(), () => this.latex_rhs_needs_parentheses()) + "}";
+        if(this.lhs instanceof UnaryFunction) {
+            return `\\${this.lhs.functionName}^{${this.rhs.formatLatex()}}\\left(${this.lhs.value.formatLatex()}\\right)`;
+        } else {
+            return "{" + addParentheses(this.lhs.formatLatex(), () => this.latex_lhs_needs_parentheses())  + "}^{" + addParentheses(this.rhs.formatLatex(), () => this.latex_rhs_needs_parentheses()) + "}";
+        }
     }
 }
 
