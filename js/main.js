@@ -18,6 +18,7 @@ calc.registerWord("tan", StackCmdTan);
 calc.registerWord("diff", StackCmdDifferential);
 calc.registerWord("integral", StackCmdIndefiniteIntegral);
 calc.registerWord("defintegral", StackCmdDefiniteIntegral);
+calc.registerWord("sq", TStackCmdChain([TStackCmdInteger(2), StackCmdPower]));
 
 calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);

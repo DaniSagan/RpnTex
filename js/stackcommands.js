@@ -487,6 +487,23 @@ class StackCmdSwap extends StackCmdBase {
 
 /**
  * 
+ * @param {number} value
+ */
+var TStackCmdInteger = function(value){
+
+    class StackCmdItem {
+        constructor() {
+        }
+        execute(stack) {
+            stack.push(new Integer(value));
+        }
+    }
+
+    return StackCmdItem;
+};
+
+/**
+ * 
  * @param {String} variableName 
  */
 var TStackCmdVariable = function(variableName){
@@ -514,6 +531,27 @@ var TStackCmdGreekVariable = function(variableName, latexCommand){
         }
         execute(stack) {
             stack.push(new GreekVariable(variableName, latexCommand));
+        }
+    }
+
+    return StackCmdItem;
+};
+
+/**
+ * 
+ * @param {Array.<StackCmdBase>} commands 
+ */
+var TStackCmdChain = function(commands){
+
+    class StackCmdItem {
+        constructor() {
+            this.commands = commands;
+        }
+        execute(stack) {
+            for(let command of this.commands) {
+                let cmdInstance = new command();
+                cmdInstance.execute(stack);
+            }
         }
     }
 
