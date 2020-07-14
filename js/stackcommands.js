@@ -484,3 +484,38 @@ class StackCmdSwap extends StackCmdBase {
         stack.push(item1);
     }
 }
+
+/**
+ * 
+ * @param {String} variableName 
+ */
+var TStackCmdVariable = function(variableName){
+
+    class StackCmdVariable {
+        constructor() {
+        }
+        execute(stack) {
+            stack.push(new Variable(variableName));
+        }
+    }
+
+    return StackCmdVariable;
+};
+
+/**
+ * 
+ * @param {String} variableName 
+ * @param {String} latexCommand
+ */
+var TStackCmdGreekVariable = function(variableName, latexCommand){
+
+    class StackCmdItem {
+        constructor() {
+        }
+        execute(stack) {
+            stack.push(new GreekVariable(variableName, latexCommand));
+        }
+    }
+
+    return StackCmdItem;
+};

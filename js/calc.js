@@ -205,6 +205,7 @@ class Calc {
      */
     registerWord(key, command) {
         this.wordDict[key] = command;
+        //this.rootNamespace.registerWord(key, command);
     }
 
     /**
@@ -239,6 +240,7 @@ class Calc {
             this.stack.push(this.rootNamespace.getValue(word));
         } else if(word in this.wordDict) {
             let cmd = new this.wordDict[word]();
+            //this.rootNamespace.getValue(word);
             cmd.execute(this.stack);
         } else if (isLetter(word)) {
             this.stack.push(new Variable(word));

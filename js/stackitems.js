@@ -150,6 +150,32 @@ class Variable extends StackItem {
     }
 }
 
+class GreekVariable extends Variable {
+    /**
+     * @param {String} value
+     */
+    constructor(name, latexCommand) {
+        super(name);
+        /** @type {String} */
+        this.latexCommand = latexCommand; 
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return this.name;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        // return `{\\color{red}{${this.name}}}`;
+        return `\\${this.latexCommand}`;
+    }
+}
+
 class UnaryOperation extends StackItem {
     /**
      * @param {StackItem} value
