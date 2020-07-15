@@ -80,6 +80,33 @@ calc.registerWord("χ", TStackCmdGreekVariable("χ", "chi"));
 calc.registerWord("ψ", TStackCmdGreekVariable("ψ", "psi")); 
 calc.registerWord("ω", TStackCmdGreekVariable("ω", "omega")); 
 
+calc.registerWord("Α", TStackCmdGreekVariable("Α", "Alpha"));
+calc.registerWord("Β", TStackCmdGreekVariable("Β", "Beta"));
+calc.registerWord("Γ", TStackCmdGreekVariable("Γ", "Gamma")); 
+calc.registerWord("Δ", TStackCmdGreekVariable("Δ", "Delta")); 
+calc.registerWord("Ε", TStackCmdGreekVariable("Ε", "Epsilon")); 
+calc.registerWord("Ζ", TStackCmdGreekVariable("Ζ", "Zeta")); 
+calc.registerWord("Η", TStackCmdGreekVariable("Η", "Eta")); 
+calc.registerWord("Θ", TStackCmdGreekVariable("Θ", "Theta")); 
+calc.registerWord("Ι", TStackCmdGreekVariable("Ι", "Iota")); 
+calc.registerWord("Κ", TStackCmdGreekVariable("Κ", "Kappa")); 
+calc.registerWord("Λ", TStackCmdGreekVariable("Λ", "Lambda")); 
+calc.registerWord("Μ", TStackCmdGreekVariable("Μ", "Mu")); 
+calc.registerWord("Ν", TStackCmdGreekVariable("Ν", "Nu")); 
+calc.registerWord("Ξ", TStackCmdGreekVariable("Ξ", "Xi")); 
+calc.registerWord("Ο", TStackCmdGreekVariable("Ο", "Omicron")); 
+calc.registerWord("Π", TStackCmdGreekVariable("Π", "Pi")); 
+calc.registerWord("Ρ", TStackCmdGreekVariable("Ρ", "Rho")); 
+calc.registerWord("Σ", TStackCmdGreekVariable("Σ", "Sigma"));
+calc.registerWord("Σ", TStackCmdGreekVariable("Σ", "Varsigma"));
+calc.registerWord("Τ", TStackCmdGreekVariable("Τ", "Tau")); 
+calc.registerWord("Υ", TStackCmdGreekVariable("Υ", "Upsilon")); 
+calc.registerWord("Φ", TStackCmdGreekVariable("Φ", "Phi")); 
+calc.registerWord("Φ", TStackCmdGreekVariable("Φ", "Varphi"));
+calc.registerWord("Χ", TStackCmdGreekVariable("Χ", "Chi")); 
+calc.registerWord("Ψ", TStackCmdGreekVariable("Ψ", "Psi")); 
+calc.registerWord("Ω", TStackCmdGreekVariable("Ω", "Omega")); 
+
 calc.registerWord("c.pi", TStackCmdConstant(new GreekVariable("π", "pi"), new Real(Math.PI))); 
 calc.registerWord("c.e", TStackCmdConstant(new Variable("e"), new Real(Math.E))); 
 calc.registerWord("c.phi", TStackCmdConstant(new GreekVariable("φ", "varphi"), new Real(1.6180339887498948482)));
@@ -247,13 +274,42 @@ function openKeyboard(evt, keyboardName) {
     evt.currentTarget.className += " active";
 } 
 
+/**
+ * 
+ * @param {KeyboardGroup} keyboardGroup 
+ * @param {Element} keyboardTabContainer
+ * @param {Element} keyboardChildContainer
+ */
+function addChildKeyboard(keyboardGroup, keyboardTabContainer, keyboardChildContainer) {
+    let keyboardButtonTabLatinLower = document.createElement("button");
+    keyboardButtonTabLatinLower.className = "keyboard-tab-button";
+    keyboardButtonTabLatinLower.onclick = function(event) {
+        openKeyboard(event, keyboardGroup.name);
+    };
+    keyboardButtonTabLatinLower.innerText = keyboardGroup.text;
+    keyboardButtonTabLatinLower.title = keyboardGroup.tooltip;
+    keyboardTabContainer.appendChild(keyboardButtonTabLatinLower);
+
+    let keyboartTabContentLatinLower = document.createElement("div");
+    keyboartTabContentLatinLower.className = "keyboard-tab-content";
+    keyboartTabContentLatinLower.id = keyboardGroup.name;
+    for(let keyboardButton of keyboardGroup.buttons) {
+        let button = document.createElement('button');
+        button.innerText = `${keyboardButton.textToShow}`;
+        button.onclick = keyboardButton.fnToExecute;
+        button.className = keyboardButton.className;
+        keyboartTabContentLatinLower.appendChild(button);
+    }
+    keyboardChildContainer.appendChild(keyboartTabContentLatinLower);
+}
+
 function updateKeyboard() {
     let keyboardDiv = document.getElementById("keyboard");
     while(keyboardDiv.firstChild) {
         keyboardDiv.removeChild(keyboardDiv.firstChild);
     }
 
-    let keyboarGroupNumeric = new KeyboardGroup("numeric", [
+    let keyboarGroupNumeric = new KeyboardGroup("numeric", "123", "Numeric", [
         new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
         new KeyboardButton("1", () => writeCommand("1"), "button-w1"),
         new KeyboardButton("2", () => writeCommand("2"), "button-w1"),
@@ -294,7 +350,7 @@ function updateKeyboard() {
         new KeyboardButton("num", () => processWord("num"), "button-w2"),
     ]);
 
-    let keyboarGroupAlphabetic = new KeyboardGroup("alphabetic", [
+    let keyboardGroupLatinLower = new KeyboardGroup("latin-lower", "abc", "Latin (lower)", [
         new KeyboardButton("q", () => writeCommand("q"), "button-w1"),
         new KeyboardButton("w", () => writeCommand("w"), "button-w1"),
         new KeyboardButton("e", () => writeCommand("e"), "button-w1"),
@@ -327,7 +383,40 @@ function updateKeyboard() {
         new KeyboardButton("⌫", () => backspace(), "button-w2")
     ]);
 
-    let keyboardGroupGreek = new KeyboardGroup("greek", [
+    let keyboardGroupLatinUpper = new KeyboardGroup("latin-upper", "ABC", "Latin (upper)", [
+        new KeyboardButton("Q", () => writeCommand("Q"), "button-w1"),
+        new KeyboardButton("W", () => writeCommand("W"), "button-w1"),
+        new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
+        new KeyboardButton("R", () => writeCommand("R"), "button-w1"),
+        new KeyboardButton("T", () => writeCommand("T"), "button-w1"),
+        new KeyboardButton("Y", () => writeCommand("Y"), "button-w1"),
+        new KeyboardButton("U", () => writeCommand("U"), "button-w1"),
+        new KeyboardButton("I", () => writeCommand("I"), "button-w1"),
+        new KeyboardButton("O", () => writeCommand("O"), "button-w1"), 
+        new KeyboardButton("P", () => writeCommand("P"), "button-w1"),
+
+        new KeyboardButton("A", () => writeCommand("A"), "button-w1"),
+        new KeyboardButton("S", () => writeCommand("S"), "button-w1"),
+        new KeyboardButton("D", () => writeCommand("D"), "button-w1"),
+        new KeyboardButton("F", () => writeCommand("F"), "button-w1"),
+        new KeyboardButton("G", () => writeCommand("G"), "button-w1"),
+        new KeyboardButton("H", () => writeCommand("H"), "button-w1"),
+        new KeyboardButton("J", () => writeCommand("J"), "button-w1"),
+        new KeyboardButton("K", () => writeCommand("K"), "button-w1"),
+        new KeyboardButton("L", () => writeCommand("L"), "button-w1"), 
+        new KeyboardButton("Ñ", () => writeCommand("Ñ"), "button-w1"),
+
+        new KeyboardButton("Z", () => writeCommand("Z"), "button-w1"),
+        new KeyboardButton("X", () => writeCommand("X"), "button-w1"),
+        new KeyboardButton("C", () => writeCommand("C"), "button-w1"),
+        new KeyboardButton("V", () => writeCommand("V"), "button-w1"),
+        new KeyboardButton("B", () => writeCommand("B"), "button-w1"),
+        new KeyboardButton("N", () => writeCommand("N"), "button-w1"),
+        new KeyboardButton("M", () => writeCommand("M"), "button-w1"),
+        new KeyboardButton("⌫", () => backspace(), "button-w2")
+    ]);
+
+    let keyboardGroupGreekLower = new KeyboardGroup("greek-lower", "φχψ", "Greek (lower)", [
         new KeyboardButton("θ", () => writeCommand("θ"), "button-w1"),
         new KeyboardButton("ω", () => writeCommand("ω"), "button-w1"),
         new KeyboardButton("ε", () => writeCommand("ε"), "button-w1"),
@@ -360,6 +449,39 @@ function updateKeyboard() {
         new KeyboardButton("⌫", () => backspace(), "button-w2")
     ]);
 
+    let keyboardGroupGreekUpper = new KeyboardGroup("greek-upper", "ΦΧΨ", "Greek (upper)", [
+        new KeyboardButton("Θ", () => writeCommand("Θ"), "button-w1"),
+        new KeyboardButton("Ω", () => writeCommand("Ω"), "button-w1"),
+        new KeyboardButton("Ε", () => writeCommand("Ε"), "button-w1"),
+        new KeyboardButton("Ρ", () => writeCommand("Ρ"), "button-w1"),
+        new KeyboardButton("Τ", () => writeCommand("Τ"), "button-w1"),
+        new KeyboardButton("Ψ", () => writeCommand("Ψ"), "button-w1"),
+        new KeyboardButton("Υ", () => writeCommand("Υ"), "button-w1"),
+        new KeyboardButton("Ι", () => writeCommand("Ι"), "button-w1"),
+        new KeyboardButton("Ο", () => writeCommand("Ο"), "button-w1"), 
+        new KeyboardButton("Π", () => writeCommand("Π"), "button-w1"),
+
+        new KeyboardButton("Α", () => writeCommand("Α"), "button-w1"),
+        new KeyboardButton("Σ", () => writeCommand("Σ"), "button-w1"),
+        new KeyboardButton("Δ", () => writeCommand("Δ"), "button-w1"),
+        new KeyboardButton("Φ", () => writeCommand("Φ"), "button-w1"),
+        new KeyboardButton("Γ", () => writeCommand("Γ"), "button-w1"),
+        new KeyboardButton("Η", () => writeCommand("Η"), "button-w1"),
+        new KeyboardButton("Σ", () => writeCommand("Σ"), "button-w1"),
+        new KeyboardButton("Κ", () => writeCommand("Κ"), "button-w1"),
+        new KeyboardButton("Λ", () => writeCommand("Λ"), "button-w1"), 
+        new KeyboardButton("Ñ", () => writeCommand("ñ"), "button-w1"),
+
+        new KeyboardButton("Ζ", () => writeCommand("Ζ"), "button-w1"),
+        new KeyboardButton("Χ", () => writeCommand("Χ"), "button-w1"),
+        new KeyboardButton("Ξ", () => writeCommand("Ξ"), "button-w1"),
+        new KeyboardButton("Ω", () => writeCommand("Ω"), "button-w1"),
+        new KeyboardButton("Β", () => writeCommand("Β"), "button-w1"),
+        new KeyboardButton("Ν", () => writeCommand("Ν"), "button-w1"),
+        new KeyboardButton("Μ", () => writeCommand("Μ"), "button-w1"),
+        new KeyboardButton("⌫", () => backspace(), "button-w2")
+    ]);
+
     let keyboardGroupDiv = document.createElement('div');
     for(let keyboardButton of keyboarGroupNumeric.buttons) {
         let button = document.createElement('button');
@@ -372,141 +494,20 @@ function updateKeyboard() {
 
     let keyboardTabDiv = document.createElement("div");
     keyboardTabDiv.className = "keyboard-tab-container";
+    keyboardTabDiv.id = "keyboard-tab-container";
     keyboardDiv.appendChild(keyboardTabDiv);
+
+    let keyboardChildDiv = document.createElement("div");
+    keyboardChildDiv.className = "keyboard-child-container";
+    keyboardChildDiv.id = "keyboard-child-container";
+    keyboardDiv.appendChild(keyboardChildDiv);
 
     // -----------------------------------------------------
 
-    let keyboardButtonTabAlphabetic = document.createElement("button");
-    keyboardButtonTabAlphabetic.className = "keyboard-tab-button";
-    keyboardButtonTabAlphabetic.onclick = function(event) {
-        openKeyboard(event, "alphabetic");
-    };
-    keyboardButtonTabAlphabetic.innerText = "Aa";
-    keyboardButtonTabAlphabetic.title = "Latin alphabet";
-    keyboardTabDiv.appendChild(keyboardButtonTabAlphabetic);
-
-    let keyboardButtonTabGreek = document.createElement("button");
-    keyboardButtonTabGreek.className = "keyboard-tab-button";
-    keyboardButtonTabGreek.onclick = function(event) {
-        openKeyboard(event, "greek");
-    };
-    keyboardButtonTabGreek.innerText = "Aα";
-    keyboardButtonTabGreek.title = "Greek alphabet";
-    keyboardTabDiv.appendChild(keyboardButtonTabGreek);
-
-    // ----------------------------------------------------
-
-    let keyboartTabContentAlphabetic = document.createElement("div");
-    keyboartTabContentAlphabetic.className = "keyboard-tab-content";
-    keyboartTabContentAlphabetic.id = "alphabetic";
-    for(let keyboardButton of keyboarGroupAlphabetic.buttons) {
-        let button = document.createElement('button');
-        button.innerText = `${keyboardButton.textToShow}`;
-        button.onclick = keyboardButton.fnToExecute;
-        button.className = keyboardButton.className;
-        keyboartTabContentAlphabetic.appendChild(button);
-    }
-    keyboardDiv.appendChild(keyboartTabContentAlphabetic);
-
-    let keyboartTabContentGreek = document.createElement("div");
-    keyboartTabContentGreek.className = "keyboard-tab-content";
-    keyboartTabContentGreek.id = "greek";
-    for(let keyboardButton of keyboardGroupGreek.buttons) {
-        let button = document.createElement('button');
-        button.innerText = `${keyboardButton.textToShow}`;
-        button.onclick = keyboardButton.fnToExecute;
-        button.className = keyboardButton.className;
-        keyboartTabContentGreek.appendChild(button);
-    }
-    keyboardDiv.appendChild(keyboartTabContentGreek);
-
-
-
-    // let keyboardGroups = [
-    //     new KeyboardGroup("numeric", [
-    //         new KeyboardButton("0", () => writeCommand("0"), "button-w1"),
-    //         new KeyboardButton("1", () => writeCommand("1"), "button-w1"),
-    //         new KeyboardButton("2", () => writeCommand("2"), "button-w1"),
-    //         new KeyboardButton("3", () => writeCommand("3"), "button-w1"),
-    //         new KeyboardButton("4", () => writeCommand("4"), "button-w1"),
-    //         new KeyboardButton("5", () => writeCommand("5"), "button-w1"),
-    //         new KeyboardButton("6", () => writeCommand("6"), "button-w1"),
-    //         new KeyboardButton("7", () => writeCommand("7"), "button-w1"),
-    //         new KeyboardButton("8", () => writeCommand("8"), "button-w1"), 
-    //         new KeyboardButton("9", () => writeCommand("9"), "button-w1"),
-
-    //         new KeyboardButton(".", () => writeCommand("."), "button-w1"),
-    //         new KeyboardButton("E", () => writeCommand("E"), "button-w1"),
-    //         new KeyboardButton("␣", () => writeCommand(" "), "button-w2"),
-    //         new KeyboardButton("+", () => processWord("+"), "button-w1"),
-    //         new KeyboardButton("-", () => processWord("-"), "button-w1"),
-    //         new KeyboardButton("*", () => processWord("*"), "button-w1"),
-    //         new KeyboardButton("/", () => processWord("/"), "button-w1"),
-    //         new KeyboardButton("exe", () => process(), "button-w2"),
-
-    //         new KeyboardButton("drop", () => processWord(".."), "button-w2"),
-    //         new KeyboardButton("dup", () => processWord("."), "button-w2"),
-    //         new KeyboardButton("x", () => processWord("x"), "button-w1"),
-    //         new KeyboardButton("y", () => processWord("y"), "button-w1"),
-    //         new KeyboardButton("z", () => processWord("z"), "button-w1"),
-    //         new KeyboardButton("d", () => processWord("diff"), "button-w1"),
-    //         new KeyboardButton("∫", () => processWord("integral"), "button-w1"),
-    //         new KeyboardButton("√", () => processWord("sqrt"), "button-w1"),
-
-    //         new KeyboardButton("^", () => processWord("pow"), "button-w1"),
-    //         new KeyboardButton("=", () => processWord("="), "button-w1"),
-    //         new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
-    //         new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
-    //         new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
-    //         new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
-
-    //         new KeyboardButton("neg", () => processWord("neg"), "button-w2")
-    //     ]),
-    //     new KeyboardGroup("alphabetic", [
-    //         new KeyboardButton("q", () => writeCommand("q"), "button-w1"),
-    //         new KeyboardButton("w", () => writeCommand("w"), "button-w1"),
-    //         new KeyboardButton("e", () => writeCommand("e"), "button-w1"),
-    //         new KeyboardButton("r", () => writeCommand("r"), "button-w1"),
-    //         new KeyboardButton("t", () => writeCommand("t"), "button-w1"),
-    //         new KeyboardButton("y", () => writeCommand("y"), "button-w1"),
-    //         new KeyboardButton("u", () => writeCommand("u"), "button-w1"),
-    //         new KeyboardButton("i", () => writeCommand("i"), "button-w1"),
-    //         new KeyboardButton("o", () => writeCommand("o"), "button-w1"), 
-    //         new KeyboardButton("p", () => writeCommand("p"), "button-w1"),
-
-    //         new KeyboardButton("a", () => writeCommand("a"), "button-w1"),
-    //         new KeyboardButton("s", () => writeCommand("s"), "button-w1"),
-    //         new KeyboardButton("d", () => writeCommand("d"), "button-w1"),
-    //         new KeyboardButton("f", () => writeCommand("f"), "button-w1"),
-    //         new KeyboardButton("g", () => writeCommand("g"), "button-w1"),
-    //         new KeyboardButton("h", () => writeCommand("h"), "button-w1"),
-    //         new KeyboardButton("j", () => writeCommand("j"), "button-w1"),
-    //         new KeyboardButton("k", () => writeCommand("k"), "button-w1"),
-    //         new KeyboardButton("l", () => writeCommand("l"), "button-w1"), 
-    //         new KeyboardButton("ñ", () => writeCommand("ñ"), "button-w1"),
-
-    //         new KeyboardButton("z", () => writeCommand("z"), "button-w1"),
-    //         new KeyboardButton("x", () => writeCommand("x"), "button-w1"),
-    //         new KeyboardButton("c", () => writeCommand("c"), "button-w1"),
-    //         new KeyboardButton("v", () => writeCommand("v"), "button-w1"),
-    //         new KeyboardButton("b", () => writeCommand("b"), "button-w1"),
-    //         new KeyboardButton("n", () => writeCommand("n"), "button-w1"),
-    //         new KeyboardButton("m", () => writeCommand("m"), "button-w1"),
-    //         new KeyboardButton("⌫", () => backspace(), "button-w2")
-    //     ]),
-    // ];
-    // for(let keyboardGroup of keyboardGroups)
-    // {
-    //     let keyboardGroupDiv = document.createElement('div');
-    //     for(let keyboardButton of keyboardGroup.buttons) {
-    //         let button = document.createElement('button');
-    //         button.innerText = `${keyboardButton.textToShow}`;
-    //         button.onclick = keyboardButton.fnToExecute;
-    //         button.className = keyboardButton.className;
-    //         keyboardGroupDiv.appendChild(button);
-    //     }
-    //     keyboardDiv.appendChild(keyboardGroupDiv);
-    // }
+    addChildKeyboard(keyboardGroupLatinLower, keyboardTabDiv, keyboardChildDiv);
+    addChildKeyboard(keyboardGroupLatinUpper, keyboardTabDiv, keyboardChildDiv);
+    addChildKeyboard(keyboardGroupGreekLower, keyboardTabDiv, keyboardChildDiv);
+    addChildKeyboard(keyboardGroupGreekUpper, keyboardTabDiv, keyboardChildDiv);
 }
 
 document.getElementById("equationArea").onmouseover = function(e) {
