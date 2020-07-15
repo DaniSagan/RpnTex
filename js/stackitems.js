@@ -182,6 +182,42 @@ class GreekVariable extends Variable {
     }
 }
 
+class Constant extends StackItem {
+    /**
+     * 
+     * @param {Variable} variable 
+     * @param {StackItem} value 
+     */
+    constructor(variable, value) {
+        super();
+        /** @type {Variable} */
+        this.variable = variable;
+        /** @type {StackItem} */
+        this.value = value;
+    }
+
+    /**
+     * @returns {String}
+     */
+    toString() {
+        return this.variable.toString();
+    }
+
+    /**
+     * @returns {String}
+     */
+    formatInnerLatex() {
+        return this.variable.formatInnerLatex();
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        return this.value.numericValue;
+    }
+}
+
 class UnaryOperation extends StackItem {
     /**
      * @param {StackItem} value

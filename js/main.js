@@ -78,6 +78,9 @@ calc.registerWord("χ", TStackCmdGreekVariable("χ", "chi"));
 calc.registerWord("ψ", TStackCmdGreekVariable("ψ", "psi")); 
 calc.registerWord("ω", TStackCmdGreekVariable("ω", "omega")); 
 
+calc.registerWord("c.pi", TStackCmdConstant(new GreekVariable("π", "pi"), new Real(Math.PI))); 
+calc.registerWord("c.e", TStackCmdConstant(new Variable("e"), new Real(Math.E))); 
+
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
 

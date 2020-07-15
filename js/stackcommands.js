@@ -553,6 +553,24 @@ var TStackCmdGreekVariable = function(variableName, latexCommand){
 
 /**
  * 
+ * @param {Variable} variable
+ * @param {StackItem} value
+ */
+var TStackCmdConstant = function(variable, value){
+
+    class StackCmdItem {
+        constructor() {
+        }
+        execute(stack) {
+            stack.push(new Constant(variable, value));
+        }
+    }
+
+    return StackCmdItem;
+};
+
+/**
+ * 
  * @param {Array.<StackCmdBase>} commands 
  */
 var TStackCmdChain = function(commands){
