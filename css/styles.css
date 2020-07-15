@@ -209,6 +209,43 @@
     font-size: 0.8em;
     font-family: monospace;
   }
+
+  /* Style the tab */
+  .keyboard-tab-container {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+  }
+
+  /* Style the buttons that are used to open the tab content */
+  .keyboard-tab-container button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.8em;
+    font-family: monospace;
+    min-width: 60px;
+    height: 40px;
+  }
+
+  /* Change background color of buttons on hover */
+  .keyboard-tab-container button:hover {
+    background-color: #ddd;
+  }
+
+  /* Create an active/current tablink class */
+  .keyboard-tab-container button.active {
+    background-color: #ccc;
+  }
+
+  /* Style the tab content */
+  .keyboard-tab-content {
+    display: none;
+    border-top: none;
+  } 
   
 }
 

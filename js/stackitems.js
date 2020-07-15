@@ -171,7 +171,6 @@ class GreekVariable extends Variable {
      * @return {String}
      */
     formatInnerLatex() {
-        // return `{\\color{red}{${this.name}}}`;
         return `\\${this.latexCommand}`;
     }
 }

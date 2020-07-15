@@ -51,7 +51,16 @@ function greatestCommonDivisor(n1, n2) {
  * @returns {boolean} 
  */
 function isLetter(str) {
-    return str.length === 1 && str.match(/[a-z]/i);
+    return str.length === 1 && (str.match(/[a-zA-Zα-ωΑ-Ω]/i));
+}
+
+/**
+ * 
+ * @param {String} str
+ * @returns {boolean} 
+ */
+function isVariable(str) {
+    return isLetter(str) || (str.length === 3 && isLetter(str[0]) && str[1] === '_' && str[2].match(/[a-zA-Zα-ωΑ-Ω0-9]/i));
 }
 
 /**

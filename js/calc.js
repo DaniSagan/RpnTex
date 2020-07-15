@@ -242,7 +242,7 @@ class Calc {
             let cmd = new this.wordDict[word]();
             //this.rootNamespace.getValue(word);
             cmd.execute(this.stack);
-        } else if (isLetter(word)) {
+        } else if (isVariable(word)) {
             this.stack.push(new Variable(word));
         } else {
             return false;
