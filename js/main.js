@@ -47,7 +47,8 @@ calc.registerWord("gr.sigma", TStackCmdGreekVariable("σ", "sigma"));
 calc.registerWord("gr.varsigma", TStackCmdGreekVariable("ς", "varsigma"));
 calc.registerWord("gr.tau", TStackCmdGreekVariable("τ", "tau")); 
 calc.registerWord("gr.upsilon", TStackCmdGreekVariable("υ", "upsilon")); 
-calc.registerWord("gr.phi", TStackCmdGreekVariable("φ", "phi")); 
+calc.registerWord("gr.phi", TStackCmdGreekVariable("ϕ", "phi")); 
+calc.registerWord("gr.varphi", TStackCmdGreekVariable("φ", "varphi")); 
 calc.registerWord("gr.chi", TStackCmdGreekVariable("χ", "chi")); 
 calc.registerWord("gr.psi", TStackCmdGreekVariable("ψ", "psi")); 
 calc.registerWord("gr.omega", TStackCmdGreekVariable("ω", "omega")); 
@@ -74,12 +75,14 @@ calc.registerWord("ς", TStackCmdGreekVariable("ς", "varsigma"));
 calc.registerWord("τ", TStackCmdGreekVariable("τ", "tau")); 
 calc.registerWord("υ", TStackCmdGreekVariable("υ", "upsilon")); 
 calc.registerWord("φ", TStackCmdGreekVariable("φ", "phi")); 
+calc.registerWord("ϕ", TStackCmdGreekVariable("ϕ", "varphi"));
 calc.registerWord("χ", TStackCmdGreekVariable("χ", "chi")); 
 calc.registerWord("ψ", TStackCmdGreekVariable("ψ", "psi")); 
 calc.registerWord("ω", TStackCmdGreekVariable("ω", "omega")); 
 
 calc.registerWord("c.pi", TStackCmdConstant(new GreekVariable("π", "pi"), new Real(Math.PI))); 
 calc.registerWord("c.e", TStackCmdConstant(new Variable("e"), new Real(Math.E))); 
+calc.registerWord("c.phi", TStackCmdConstant(new GreekVariable("φ", "varphi"), new Real(1.6180339887498948482)));
 
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
