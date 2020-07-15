@@ -24,6 +24,7 @@ calc.registerWord("=", StackCmdEquality);
 calc.registerWord(".", StackCmdDup);
 calc.registerWord("..", StackCmdDrop);
 calc.registerWord("swap", StackCmdSwap);
+calc.registerWord("num", StackCmdNumericValue);
 
 calc.registerWord("gr.alpha", TStackCmdGreekVariable("α", "alpha"));
 calc.registerWord("gr.beta", TStackCmdGreekVariable("β", "beta"));
@@ -283,7 +284,8 @@ function updateKeyboard() {
         new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
         new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
 
-        new KeyboardButton("neg", () => processWord("neg"), "button-w2")
+        new KeyboardButton("neg", () => processWord("neg"), "button-w2"),
+        new KeyboardButton("num", () => processWord("num"), "button-w2"),
     ]);
 
     let keyboarGroupAlphabetic = new KeyboardGroup("alphabetic", [
@@ -318,10 +320,6 @@ function updateKeyboard() {
         new KeyboardButton("m", () => writeCommand("m"), "button-w1"),
         new KeyboardButton("⌫", () => backspace(), "button-w2")
     ]);
-
-    /*θωερτψυιοπ
-    ασδφγηςκλ
-    ζχξωβνμ*/
 
     let keyboardGroupGreek = new KeyboardGroup("greek", [
         new KeyboardButton("θ", () => writeCommand("θ"), "button-w1"),

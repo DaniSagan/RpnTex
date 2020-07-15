@@ -74,6 +74,13 @@ class StackItem {
     get children() {
         return [];
     }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        return this;
+    }
 }
 
 class Integer extends StackItem {
@@ -222,6 +229,25 @@ class Sqrt extends UnaryOperation {
     formatInnerLatex() {
         return `\\sqrt{${this.value.formatLatex()}}`;
     }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer) {
+            let res = Math.sqrt(innerValue.value);
+            if(res * res === innerValue.value) {
+                return new Integer(res);
+            } else {
+                return new Real(res);
+            }
+        } else if(innerValue instanceof Real) {
+            return new Real(Math.sqrt(innerValue.value));
+        } else {
+            return this;
+        }
+    }
 }
 
 class Abs extends UnaryOperation {
@@ -244,6 +270,20 @@ class Abs extends UnaryOperation {
      */
     formatInnerLatex() {
         return `\\left|${this.value.formatLatex()}\\right|`;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer) {
+            return new Integer(Math.abs(innerValue.value));
+        } else if(innerValue instanceof Real) {
+            return new Real(Math.abs(innerValue.value));
+        } else {
+            return this;
+        }
     }
 }
 
@@ -283,6 +323,20 @@ class Neg extends UnaryOperation {
      */
     formatInnerLatex() {
         return this.needs_parentheses() ? `-\\left(${this.value.toString()}\\right)` : `-${this.value.toString()}`;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer) {
+            return new Integer(-innerValue.value);
+        } else if(innerValue instanceof Real) {
+            return new Real(-innerValue.value);
+        } else {
+            return this;
+        }
     }
 }
 
@@ -341,19 +395,18 @@ class Sin extends UnaryFunction {
         super(value, "sin");
     }
 
-    // /**
-    //  * @return {String}
-    //  */
-    // toString() {
-    //     return `sin(${this.value.toString()})`;
-    // }
-
-    // /**
-    //  * @return {String}
-    //  */
-    // formatInnerLatex() {
-    //     return `\\sin\\left(${this.value.formatLatex()}\\right)`
-    // }
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer ||
+           innerValue instanceof Real) {
+            return new Real(Math.sin(innerValue.value));
+        } else {
+            return this;
+        }
+    }
 }
 
 class Cos extends UnaryFunction {
@@ -361,19 +414,18 @@ class Cos extends UnaryFunction {
         super(value, "cos");
     }
 
-    // /**
-    //  * @return {String}
-    //  */
-    // toString() {
-    //     return `cos(${this.value.toString()})`;
-    // }
-
-    // /**
-    //  * @return {String}
-    //  */
-    // formatInnerLatex() {
-    //     return `\\cos\\left(${this.value.formatLatex()}\\right)`
-    // }
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer ||
+           innerValue instanceof Real) {
+            return new Real(Math.cos(innerValue.value));
+        } else {
+            return this;
+        }
+    }
 }
 
 class Tan extends UnaryFunction {
@@ -381,19 +433,18 @@ class Tan extends UnaryFunction {
         super(value, "tan");
     }
 
-    // /**
-    //  * @return {String}
-    //  */
-    // toString() {
-    //     return `tan(${this.value.toString()})`;
-    // }
-
-    // /**
-    //  * @return {String}
-    //  */
-    // formatInnerLatex() {
-    //     return `\\tan\\left(${this.value.formatLatex()}\\right)`
-    // }
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer ||
+           innerValue instanceof Real) {
+            return new Real(Math.tan(innerValue.value));
+        } else {
+            return this;
+        }
+    }
 }
 
 class BinaryOperation extends StackItem {
@@ -518,6 +569,29 @@ class Sum extends BinaryOperation {
         }
         return false;
     }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        if(lhsInnerValue instanceof Integer &&
+           rhsInnerValue instanceof Integer) {
+            return new Integer(lhsInnerValue.value + rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value + rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Integer) {
+            return new Real(lhsInnerValue.value + rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value + rhsInnerValue.value);
+        } else {
+            return this;
+        }
+    }
 }
 
 class Subtraction extends BinaryOperation {
@@ -557,6 +631,29 @@ class Subtraction extends BinaryOperation {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        if(lhsInnerValue instanceof Integer &&
+           rhsInnerValue instanceof Integer) {
+            return new Integer(lhsInnerValue.value - rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value - rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Integer) {
+            return new Real(lhsInnerValue.value - rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value - rhsInnerValue.value);
+        } else {
+            return this;
+        }
     }
 }
 
@@ -605,6 +702,29 @@ class Multiplication extends BinaryOperation {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        if(lhsInnerValue instanceof Integer &&
+           rhsInnerValue instanceof Integer) {
+            return new Integer(lhsInnerValue.value * rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value * rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Integer) {
+            return new Real(lhsInnerValue.value * rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(lhsInnerValue.value * rhsInnerValue.value);
+        } else {
+            return this;
+        }
     }
 }
 
@@ -662,6 +782,36 @@ class Fraction extends BinaryOperation {
     formatInnerLatex() {
         return "\\frac{" + this.lhs.formatLatex()  + "}{" + this.rhs.formatLatex() + "}";
     }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        if(lhsInnerValue instanceof Integer &&
+           rhsInnerValue instanceof Integer) {
+            let gcd = greatestCommonDivisor(lhsInnerValue.value, rhsInnerValue.value);
+            let numerator = parseInt(lhsInnerValue.value/gcd);
+            let denominator = parseInt(rhsInnerValue.value/gcd);
+            if(denominator === 1) {
+                return new Integer(numerator);
+            } else {
+                return new Real((1.0*numerator) / denominator);              
+            }
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Real) {
+            return new Real((1.0*lhsInnerValue.value) / rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Integer) {
+            return new Real((1.0*lhsInnerValue.value) / rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Real) {
+            return new Real((1.0*lhsInnerValue.value) / rhsInnerValue.value);
+        } else {
+            return this;
+        }
+    }
 }
 
 class Power extends BinaryOperation {
@@ -718,6 +868,29 @@ class Power extends BinaryOperation {
             return `\\${this.lhs.functionName}^{${this.rhs.formatLatex()}}\\left(${this.lhs.value.formatLatex()}\\right)`;
         } else {
             return "{" + addParentheses(this.lhs.formatLatex(), () => this.latex_lhs_needs_parentheses())  + "}^{" + addParentheses(this.rhs.formatLatex(), () => this.latex_rhs_needs_parentheses()) + "}";
+        }
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        if(lhsInnerValue instanceof Integer &&
+           rhsInnerValue instanceof Integer) {
+            return new Integer(parseInt(Math.pow(lhsInnerValue.value, rhsInnerValue.value)));
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(Math.pow(lhsInnerValue.value, rhsInnerValue.value));
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Integer) {
+            return new Real(Math.pow(lhsInnerValue.value, rhsInnerValue.value));
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Real) {
+            return new Real(Math.pow(lhsInnerValue.value, rhsInnerValue.value));
+        } else {
+            return this;
         }
     }
 }

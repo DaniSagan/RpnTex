@@ -188,6 +188,20 @@ class StackCmdEval extends StackCmdBase {
     }
 }
 
+class StackCmdNumericValue extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        var item = stack.pop(); /** @type {StackItem} */
+        stack.push(item.numericValue);
+    }
+}
+
 class StackCmdApply extends StackCmdBase {
     /**
      * 
