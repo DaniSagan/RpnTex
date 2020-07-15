@@ -245,7 +245,7 @@ class Sqrt extends UnaryOperation {
         } else if(innerValue instanceof Real) {
             return new Real(Math.sqrt(innerValue.value));
         } else {
-            return this;
+            return new Sqrt(innerValue);
         }
     }
 }
@@ -282,7 +282,7 @@ class Abs extends UnaryOperation {
         } else if(innerValue instanceof Real) {
             return new Real(Math.abs(innerValue.value));
         } else {
-            return this;
+            return new Abs(innerValue.value);
         }
     }
 }
@@ -335,7 +335,7 @@ class Neg extends UnaryOperation {
         } else if(innerValue instanceof Real) {
             return new Real(-innerValue.value);
         } else {
-            return this;
+            return new Neg(innerValue);
         }
     }
 }
@@ -404,7 +404,7 @@ class Sin extends UnaryFunction {
            innerValue instanceof Real) {
             return new Real(Math.sin(innerValue.value));
         } else {
-            return this;
+            return new Sin(innerValue);
         }
     }
 }
@@ -423,7 +423,7 @@ class Cos extends UnaryFunction {
            innerValue instanceof Real) {
             return new Real(Math.cos(innerValue.value));
         } else {
-            return this;
+            return new Cos(innerValue);
         }
     }
 }
@@ -442,7 +442,7 @@ class Tan extends UnaryFunction {
            innerValue instanceof Real) {
             return new Real(Math.tan(innerValue.value));
         } else {
-            return this;
+            return Tan(innerValue);
         }
     }
 }
@@ -589,7 +589,7 @@ class Sum extends BinaryOperation {
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value + rhsInnerValue.value);
         } else {
-            return this;
+            return new Sum(lhsInnerValue, rhsInnerValue);
         }
     }
 }
@@ -652,7 +652,7 @@ class Subtraction extends BinaryOperation {
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value - rhsInnerValue.value);
         } else {
-            return this;
+            return new Subtraction(lhsInnerValue, rhsInnerValue);
         }
     }
 }
@@ -723,7 +723,7 @@ class Multiplication extends BinaryOperation {
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value * rhsInnerValue.value);
         } else {
-            return this;
+            return new Multiplication(lhsInnerValue, rhsInnerValue);
         }
     }
 }
@@ -809,7 +809,7 @@ class Fraction extends BinaryOperation {
                   rhsInnerValue instanceof Real) {
             return new Real((1.0*lhsInnerValue.value) / rhsInnerValue.value);
         } else {
-            return this;
+            return new Fraction(lhsInnerValue, rhsInnerValue);;
         }
     }
 }
@@ -890,7 +890,7 @@ class Power extends BinaryOperation {
                   rhsInnerValue instanceof Real) {
             return new Real(Math.pow(lhsInnerValue.value, rhsInnerValue.value));
         } else {
-            return this;
+            return new Power(lhsInnerValue, rhsInnerValue);
         }
     }
 }

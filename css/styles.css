@@ -77,6 +77,7 @@
     font-size: 0.8em;
     font-family: monospace;
     cursor: pointer;
+    padding: 0px;
   }
   
   .button-w2 {
@@ -85,6 +86,7 @@
     font-size: 0.8em;
     font-family: monospace;
     cursor: pointer;
+    padding: 0px;
   }
 
    /* Style the tab */
