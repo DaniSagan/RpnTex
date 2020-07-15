@@ -378,6 +378,7 @@ function updateKeyboard() {
         openKeyboard(event, "alphabetic");
     };
     keyboardButtonTabAlphabetic.innerText = "Aa";
+    keyboardButtonTabAlphabetic.title = "Latin alphabet";
     keyboardTabDiv.appendChild(keyboardButtonTabAlphabetic);
 
     let keyboardButtonTabGreek = document.createElement("button");
@@ -386,6 +387,7 @@ function updateKeyboard() {
         openKeyboard(event, "greek");
     };
     keyboardButtonTabGreek.innerText = "Aα";
+    keyboardButtonTabGreek.title = "Greek alphabet";
     keyboardTabDiv.appendChild(keyboardButtonTabGreek);
 
     // ----------------------------------------------------
