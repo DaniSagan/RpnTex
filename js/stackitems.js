@@ -483,6 +483,79 @@ class Tan extends UnaryFunction {
     }
 }
 
+class Log extends UnaryFunction {
+    constructor(base, value) {
+        super(value, "log");
+        /** @type {StackItem} */
+        this.base = base;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        let baseValue = this.base.numericValue;
+        if(innerValue instanceof Integer && baseValue instanceof Integer) {
+            return new Real(Math.log(innerValue.value)/Math.log(baseValue.value));
+        } else if(innerValue instanceof Integer && baseValue instanceof Real) {
+            return new Real(Math.log(innerValue.value)/Math.log(baseValue.value));
+        } else if(innerValue instanceof Real && baseValue instanceof Integer) {
+            return new Real(Math.log(innerValue.value)/Math.log(baseValue.value));
+        }else if(innerValue instanceof Real && baseValue instanceof Real) {
+            return new Real(Math.log(innerValue.value)/Math.log(baseValue.value));   
+        } else {
+            return Log(baseValue, innerValue);
+        }
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `${this.functionName}_${this.base.toString()}(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\${this.functionName}_{${this.base.formatLatex()}}\\left(${this.value.formatLatex()}\\right)`
+    }
+}
+
+class Ln extends Log {
+    constructor(value) {
+        super(new Constant(new Variable("e"), new Real(Math.E)), value);
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer || innerValue instanceof Real) {
+            return new Real(Math.log(innerValue.value));
+        } else {
+            return Log(baseValue, innerValue);
+        }
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `ln(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\ln\\left(${this.value.formatLatex()}\\right)`
+    }
+}
+
 class BinaryOperation extends StackItem {
     /**
      * @param {StackItem} lhs

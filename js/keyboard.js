@@ -5,7 +5,7 @@ class KeyboardButton {
      * 
      * @param {String} textToShow 
      * @param {function() => void} fnToExecute 
-     * @param {class} className 
+     * @param {String} className 
      */
     constructor(textToShow, fnToExecute, className) {
         this.textToShow = textToShow;
