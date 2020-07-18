@@ -395,6 +395,35 @@ class StackCmdTan extends StackCmdBase {
     }
 }
 
+class StackCmdLog extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        let itemValue = stack.pop();
+        let itemBase = stack.pop();
+        stack.push(new Log(itemBase, itemValue));
+    }
+}
+
+class StackCmdLn extends StackCmdBase {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Stack} stack 
+     */
+    execute(stack) {
+        let itemValue = stack.pop();
+        stack.push(new Ln(itemValue));
+    }
+}
+
 class StackCmdEquality extends StackCmdBase {
     constructor() {
         super();
@@ -568,6 +597,41 @@ var TStackCmdConstant = function(variable, value){
 
     return StackCmdItem;
 };
+
+/**
+ * 
+ * @param {function} unaryFunctionClass 
+ */
+var TStackCmdUnaryFunction = function(unaryFunctionClass) {
+
+    class StackCmdItem {
+        constructor() {
+        }
+
+        execute(stack) {
+            let item = stack.pop();
+            stack.push(new unaryFunctionClass(item));
+        }
+    }
+
+    return StackCmdItem;
+}
+
+var TStackCmdBinaryFunction = function(binaryFunctionClass) {
+
+    class StackCmdItem {
+        constructor() {
+        }
+
+        execute(stack) {
+            let item2 = stack.pop();
+            let item1 = stack.pop();
+            stack.push(new binaryFunctionClass(item1, item2));
+        }
+    }
+
+    return StackCmdItem;
+}
 
 /**
  * 

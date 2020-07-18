@@ -505,7 +505,7 @@ class Log extends UnaryFunction {
         }else if(innerValue instanceof Real && baseValue instanceof Real) {
             return new Real(Math.log(innerValue.value)/Math.log(baseValue.value));   
         } else {
-            return Log(baseValue, innerValue);
+            return new Log(baseValue, innerValue);
         }
     }
 
@@ -936,7 +936,7 @@ class Power extends BinaryOperation {
      * @returns {boolean}
      */
     lhs_needs_parentheses() {
-        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable) {
+        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable || this.lhs instanceof Constant) {
             return false;
         }
         return true;
@@ -946,7 +946,7 @@ class Power extends BinaryOperation {
      * @returns {boolean}
      */
     rhs_needs_parentheses() {
-        if(this.rhs instanceof Integer || this.rhs instanceof Real  || this.rhs instanceof Variable) {
+        if(this.rhs instanceof Integer || this.rhs instanceof Real  || this.rhs instanceof Variable || this.rhs instanceof Constant) {
             return false;
         }
         return true;
@@ -956,7 +956,7 @@ class Power extends BinaryOperation {
      * @returns {boolean}
      */
     latex_lhs_needs_parentheses() {
-        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable) {
+        if(this.lhs instanceof Integer || this.lhs instanceof Real || this.lhs instanceof Variable || this.lhs instanceof Constant) {
             return false;
         }
         return true;

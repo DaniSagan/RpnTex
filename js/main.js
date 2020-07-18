@@ -15,6 +15,8 @@ calc.registerWord("neg", StackCmdNeg);
 calc.registerWord("sin", StackCmdSin);
 calc.registerWord("cos", StackCmdCos);
 calc.registerWord("tan", StackCmdTan);
+calc.registerWord("log", StackCmdLog);
+calc.registerWord("ln", StackCmdLn);
 calc.registerWord("diff", StackCmdDifferential);
 calc.registerWord("integral", StackCmdIndefiniteIntegral);
 calc.registerWord("defintegral", StackCmdDefiniteIntegral);
@@ -341,11 +343,7 @@ function updateKeyboard() {
 
         new KeyboardButton("^", () => processWord("pow"), "button-w1"),
         new KeyboardButton("=", () => processWord("="), "button-w1"),
-        new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
-        new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
-        new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
         new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
-
         new KeyboardButton("neg", () => processWord("neg"), "button-w2"),
         new KeyboardButton("num", () => processWord("num"), "button-w2"),
     ]);
@@ -482,6 +480,14 @@ function updateKeyboard() {
         new KeyboardButton("⌫", () => backspace(), "button-w2")
     ]);
 
+    let keyboardGroupOperations = new KeyboardGroup("operations", "Fn", "Operations", [
+        new KeyboardButton("sin", () => processWord("sin"), "button-w1"),
+        new KeyboardButton("cos", () => processWord("sin"), "button-w1"),
+        new KeyboardButton("tan", () => processWord("sin"), "button-w1"),
+        new KeyboardButton("log", () => processWord("sin"), "button-w1"),
+        new KeyboardButton("ln", () => processWord("sin"), "button-w1"),
+    ]);
+
     let keyboardGroupDiv = document.createElement('div');
     for(let keyboardButton of keyboarGroupNumeric.buttons) {
         let button = document.createElement('button');
@@ -508,6 +514,7 @@ function updateKeyboard() {
     addChildKeyboard(keyboardGroupLatinUpper, keyboardTabDiv, keyboardChildDiv);
     addChildKeyboard(keyboardGroupGreekLower, keyboardTabDiv, keyboardChildDiv);
     addChildKeyboard(keyboardGroupGreekUpper, keyboardTabDiv, keyboardChildDiv);
+    addChildKeyboard(keyboardGroupOperations, keyboardTabDiv, keyboardChildDiv);
 }
 
 document.getElementById("equationArea").onmouseover = function(e) {
