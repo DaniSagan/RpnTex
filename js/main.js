@@ -122,13 +122,20 @@ function init() {
 }
 
 function updateStackTextArea() {
-    let text = "";            
+    /** @type {String} */
+    let text = "";
+    for(const key in calc.rootNamespace.wordDict) {
+        text = text.concat("[" + key + "]    " + calc.rootNamespace.wordDict[key].toString() + "\n");
+    }
+    if(text != "") {
+        text += "――――――――――――――――――――――――――――――――\n";
+    }            
     for(let k = calc.stack.count() - 1; k >= 0; k--) {
         text = text.concat("[" + k.toString() + "]    " + calc.stack.get(k).toString() + "\n");
     }
     let stackArea = document.getElementById("stackArea");
     stackArea.value = text;
-    stackArea.scrollTop = stackArea.scrollHeight;;
+    stackArea.scrollTop = stackArea.scrollHeight;
 }
 
 function updateEquationText() {
