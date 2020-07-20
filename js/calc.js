@@ -47,9 +47,9 @@ class Namespace {
         /** @type {String} */
         this.name = name;
         /** @type {Object.<String, any>} */
-        this.wordDict = {}
+        this.wordDict = {};
         /** @type {Object} */
-        this.childNamespaceDict = {}
+        this.childNamespaceDict = {};
     }
 
     /**
@@ -91,6 +91,28 @@ class Namespace {
             let path = tokens.slice(1).join(".");
             if(namespaceKey in this.childNamespaceDict) {
                 return this.childNamespaceDict[namespaceKey].getValue(path);
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {String} key 
+     */
+    removeValue(key) {
+        /** @type {String[]} */
+        let tokens = key.split(".");
+        if(tokens.length === 1) {
+            if(key in this.wordDict) {
+                delete this.wordDict[key];
+            } else {
+                throw new Error(`Key ${key} not found in word dictionary`);
+            }
+        } else {
+            let namespaceKey = tokens[0];
+            let path = tokens.slice(1).join(".");
+            if(namespaceKey in this.childNamespaceDict) {
+                return this.childNamespaceDict[namespaceKey].removeValue(path);
             }
         }
     }
@@ -196,6 +218,8 @@ class Calc {
         this.selectedItem = null;
         /** @type {Namespace} */
         this.rootNamespace = new Namespace(null, "");
+        /** @type {Array.<CmdBase>} */
+        this.cmdStack = [];
     }
 
     /**
@@ -223,31 +247,63 @@ class Calc {
      */
     process(word) {
         if(!isNaN(word)) {
+            /** @type {function} */
+            let cmdClass = null;
             if(isInteger(word)) {
-                this.stack.push(new Integer(parseInt(word, 10)));
+                cmdClass = TCmdPushValue(new Integer(parseInt(word, 10)));
             } else if(isFloat(word)) {
-                this.stack.push(new Real(parseFloat(word)));
+                cmdClass = TCmdPushValue(new Real(parseFloat(word)));
+            } else {
+                throw new Error(`Number format not recognized for expression ${word}`);
             }
+            let cmdInstance = new cmdClass();
+            this.executeCommand(cmdInstance);
+        } else if(word == "undo") {
+            this.undoCommand();
         } else if(word.startsWith("@")) {
             let variableName = word.substring(1);
             if(Calc.isValidNamespaceName(variableName)) {
-                this.rootNamespace.addValue(variableName, this.stack.pop());
+                let cmdClass = TCmdStoreValue(variableName, this.stack.pop());
+                let cmdInstance = new cmdClass();
+                this.executeCommand(cmdInstance);
             } else {
                 throw new Error(`${variableName} is an invalid variable name`);
             }
         } else if(this.rootNamespace.containsValue(word)) {
-            if(Calc.isValidNamespaceName(word))
-            this.stack.push(this.rootNamespace.getValue(word));
+            if(Calc.isValidNamespaceName(word)) {
+                let cmdClass = TCmdPushValue(this.rootNamespace.getValue(word));
+                /** @type {CmdBase} */
+                let cmdInstance = new cmdClass();
+                this.executeCommand(cmdInstance);
+            }
         } else if(word in this.wordDict) {
-            let cmd = new this.wordDict[word]();
+            let cmdInstance = new this.wordDict[word]();
             //this.rootNamespace.getValue(word);
-            cmd.execute(this.stack);
+            this.executeCommand(cmdInstance);
         } else if (isVariable(word)) {
-            this.stack.push(new Variable(word));
+            /** @type {CmdBase} */
+            let cmdClass = TCmdPushValue(new Variable(word));
+            let cmdInstance = new cmdClass();
+            this.executeCommand(cmdInstance);
         } else {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 
+     * @param {CmdBase} command 
+     */
+    executeCommand(command) {
+        command.execute(this);
+        this.cmdStack.push(command);
+    }
+
+    undoCommand() {
+        /** @type {CmdBase} */
+        let cmd = this.cmdStack.pop();
+        cmd.undo(this);
     }
 
     static isValidVariableName(variableName) {

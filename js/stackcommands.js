@@ -1,33 +1,57 @@
 'use strict';
 
-class StackCmdBase {
+/**
+ * Base class for commands.
+ */
+class CmdBase {
     constructor() {
-        if(new.target === StackCmdBase) {
+        if(new.target === CmdBase) {
             throw new TypeError("Cannot create an instance of an abstract class");
         }
     }
 
     /**
-     * 
-     * @param {Stack} stack 
+     * Execute the command.
+     * @param {Calc} calc 
      */
-    execute(stack) {
+    execute(calc) {
+
+    }
+
+    /**
+     * Undo the command.
+     * @param {Calc} calc 
+     */
+    undo(calc) {
 
     }
 }
 
-class StackCmdEval extends StackCmdBase {
+class CmdEval extends CmdBase {
+
     constructor() {
         super();
+        /** @type {StackItem} */
+        this.item = null;
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item = stack.pop(); /** @type {StackItem} */
-        var evaluatedItem = this.eval(item);
-        stack.push(evaluatedItem);
+    execute(calc) {
+        this.item = calc.stack.pop(); 
+        let evaluatedItem = this.eval(this.item);
+        calc.stack.push(evaluatedItem);
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
     }
 
     /**
@@ -178,7 +202,6 @@ class StackCmdEval extends StackCmdBase {
     }
 
     /**
-     * 
      * @param {Sqrt} item
      * @returns {StackItem} 
      */
@@ -188,21 +211,33 @@ class StackCmdEval extends StackCmdBase {
     }
 }
 
-class StackCmdNumericValue extends StackCmdBase {
+class CmdNumericValue extends CmdBase {
     constructor() {
         super();
+        /** @type {StackItem} */
+        this.item = null;
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item = stack.pop(); /** @type {StackItem} */
-        stack.push(item.numericValue);
+    execute(calc) {
+        this.item = calc.stack.pop(); /** @type {StackItem} */
+        calc.stack.push(this.item.numericValue);
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
     }
 }
 
-class StackCmdApply extends StackCmdBase {
+class CmdApply extends CmdBase {
     /**
      * 
      * @param {function(StackItem) => StackItem} fn 
@@ -210,321 +245,617 @@ class StackCmdApply extends StackCmdBase {
     constructor(fn) {
         super();
         this.fn = fn;
+        /** @type {StackItem} */
+        this.item = null;
     }
 
     /**
-     * 
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(item);
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(this.fn(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
     }
 }
 
-class StackCmdAbs extends StackCmdBase {
+class CmdAbs extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Abs(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdSum extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Sum(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdSubtraction extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Subtraction(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdMultiplication extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Multiplication(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdFraction extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Fraction(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdPower extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Power(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdInv extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Fraction(new Integer(1), this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdSqrt extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Sqrt(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdNeg extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Neg(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdSin extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Sin(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdCos extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Cos(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdTan extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Tan(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdLog extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.itemValue = null;
+        /** @type {StackItem} */
+        this.itemBase = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.itemValue = calc.stack.pop();
+        this.itemBase = calc.stack.pop();
+        calc.stack.push(new Log(this.itemBase, this.itemValue));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.itemBase);
+        calc.stack.push(this.itemValue);
+    }
+}
+
+class CmdLn extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.itemValue = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.itemValue = calc.stack.pop();
+        calc.stack.push(new Ln(this.itemValue));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.itemValue);
+    }
+}
+
+class CmdEquality extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(new Equality(this.item1, this.item2));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
+    }
+}
+
+class CmdDifferential extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Differential(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
+class CmdIndefiniteIntegral extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.itemDifferential = null;
+        /** @type {StackItem} */
+        this.itemValue = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.itemDifferential = calc.stack.pop();
+        this.itemValue = calc.stack.pop();
+        calc.stack.push(new Integral(itemValue, itemDifferential, null, null));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.itemValue);
+        calc.stack.push(this.itemDifferential);
+    }
+}
+
+class CmdDefiniteIntegral extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.itemDifferential = null;
+        /** @type {StackItem} */
+        this.itemValue = null;
+        /** @type {StackItem} */
+        this.itemSuperScript = null;
+        /** @type {StackItem} */
+        this.itemSubscript = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.itemDifferential = calc.stack.pop();
+        this.itemValue = calc.stack.pop();
+        this.itemSuperScript = calc.stack.pop();
+        this.itemSubscript = calc.stack.pop();
+        calc.stack.push(new Integral(itemValue, itemDifferential, itemSubscript, itemSuperScript));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.itemSubscript);
+        calc.stack.push(this.itemSuperScript);
+        calc.stack.push(this.itemValue);
+        calc.stack.push(this.itemDifferential);
+    }
+}
+
+class CmdDup extends CmdBase {
     constructor() {
         super();
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item = stack.pop(); /** @type {StackItem} */
-        stack.push(new Abs(item));
-    }
-}
-
-class StackCmdSum extends StackCmdBase {
-    constructor() {
-        super();
+    execute(calc) {
+        var item = calc.stack.get(0);
+        calc.stack.push(item);
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item2 = stack.pop(); /** @type {StackItem} */
-        var item1 = stack.pop(); /** @type {StackItem} */
-        stack.push(new Sum(item1, item2));
+    undo(calc) {
+        calc.stack.pop();
     }
 }
 
-class StackCmdSubtraction extends StackCmdBase {
+class CmdDrop extends CmdBase {
     constructor() {
         super();
+        /** @type {StackItem} */
+        this.item = null;
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item2 = stack.pop(); /** @type {StackItem} */
-        var item1 = stack.pop(); /** @type {StackItem} */
-        stack.push(new Subtraction(item1, item2));
+    execute(calc) {
+        this.item = calc.stack.pop();
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.push(this.item);
     }
 }
 
-class StackCmdMultiplication extends StackCmdBase {
+class CmdSwap extends CmdBase {
     constructor() {
         super();
+        /** @type {StackItem} */
+        this.item1 = null;
+        /** @type {StackItem} */
+        this.item2 = null;
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item2 = stack.pop(); /** @type {StackItem} */
-        var item1 = stack.pop(); /** @type {StackItem} */
-        stack.push(new Multiplication(item1, item2));
-    }
-}
-
-class StackCmdFraction extends StackCmdBase {
-    constructor() {
-        super();
+    execute(calc) {
+        this.item2 = calc.stack.pop();
+        this.item1 = calc.stack.pop();
+        calc.stack.push(this.item2);
+        calc.stack.push(this.item1);
     }
 
     /**
-     * @param {Stack} stack 
+     * @inheritdoc
+     * @param {Calc} calc 
      */
-    execute(stack) {
-        var item2 = stack.pop(); /** @type {StackItem} */
-        var item1 = stack.pop(); /** @type {StackItem} */
-        stack.push(new Fraction(item1, item2));
-    }
-}
-
-class StackCmdPower extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item2 = stack.pop(); /** @type {StackItem} */
-        var item1 = stack.pop(); /** @type {StackItem} */
-        stack.push(new Power(item1, item2));
-    }
-}
-
-class StackCmdInv extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Fraction(new Integer(1), item));
-    }
-}
-
-class StackCmdSqrt extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Sqrt(item));
-    }
-}
-
-class StackCmdNeg extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Neg(item));
-    }
-}
-
-class StackCmdSin extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Sin(item));
-    }
-}
-
-class StackCmdCos extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Cos(item));
-    }
-}
-
-class StackCmdTan extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Tan(item));
-    }
-}
-
-class StackCmdLog extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        let itemValue = stack.pop();
-        let itemBase = stack.pop();
-        stack.push(new Log(itemBase, itemValue));
-    }
-}
-
-class StackCmdLn extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        let itemValue = stack.pop();
-        stack.push(new Ln(itemValue));
-    }
-}
-
-class StackCmdEquality extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item2 = stack.pop();
-        var item1 = stack.pop();
-        stack.push(new Equality(item1, item2));
-    }
-}
-
-class StackCmdDifferential extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-        stack.push(new Differential(item));
-    }
-}
-
-class StackCmdIndefiniteIntegral extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var itemDifferential = stack.pop();
-        var itemValue = stack.pop();
-        stack.push(new Integral(itemValue, itemDifferential, null, null));
-    }
-}
-
-class StackCmdDefiniteIntegral extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var itemDifferential = stack.pop();
-        var itemValue = stack.pop();
-        var itemSuperScript = stack.pop();
-        var itemSubscript = stack.pop();
-        stack.push(new Integral(itemValue, itemDifferential, itemSubscript, itemSuperScript));
-    }
-}
-
-class StackCmdDup extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.get(0);
-        stack.push(item);
-    }
-}
-
-class StackCmdDrop extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item = stack.pop();
-    }
-}
-
-class StackCmdSwap extends StackCmdBase {
-    constructor() {
-        super();
-    }
-
-    /**
-     * @param {Stack} stack 
-     */
-    execute(stack) {
-        var item2 = stack.pop();
-        var item1 = stack.pop();
-        stack.push(item2);
-        stack.push(item1);
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.pop();
+        calc.stack.push(this.item1);
+        calc.stack.push(this.item2);
     }
 }
 
@@ -532,34 +863,62 @@ class StackCmdSwap extends StackCmdBase {
  * 
  * @param {number} value
  */
-var TStackCmdInteger = function(value){
+var TCmdInteger = function(value){
 
-    class StackCmdItem {
+    class CmdItem extends CmdBase {
         constructor() {
+            super();
         }
-        execute(stack) {
-            stack.push(new Integer(value));
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            calc.stack.push(new Integer(value));
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
 };
 
 /**
  * 
  * @param {String} variableName 
  */
-var TStackCmdVariable = function(variableName){
+var TCmdVariable = function(variableName){
 
-    class StackCmdVariable {
+    class CmdVariable extends CmdBase {
         constructor() {
+            super();
         }
-        execute(stack) {
-            stack.push(new Variable(variableName));
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            calc.stack.push(new Variable(variableName));
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
         }
     }
 
-    return StackCmdVariable;
+    return CmdVariable;
 };
 
 /**
@@ -567,17 +926,31 @@ var TStackCmdVariable = function(variableName){
  * @param {String} variableName 
  * @param {String} latexCommand
  */
-var TStackCmdGreekVariable = function(variableName, latexCommand){
+var TCmdGreekVariable = function(variableName, latexCommand){
 
-    class StackCmdItem {
+    class CmdItem extends CmdBase {
         constructor() {
+            super();
         }
-        execute(stack) {
-            stack.push(new GreekVariable(variableName, latexCommand));
+        
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            calc.stack.push(new GreekVariable(variableName, latexCommand));
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
 };
 
 /**
@@ -585,71 +958,193 @@ var TStackCmdGreekVariable = function(variableName, latexCommand){
  * @param {Variable} variable
  * @param {StackItem} value
  */
-var TStackCmdConstant = function(variable, value){
+var TCmdConstant = function(variable, value){
 
-    class StackCmdItem {
+    class CmdItem extends CmdBase {
         constructor() {
+            super();
         }
-        execute(stack) {
-            stack.push(new Constant(variable, value));
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            calc.stack.push(new Constant(variable, value));
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
 };
 
 /**
  * 
  * @param {function} unaryFunctionClass 
  */
-var TStackCmdUnaryFunction = function(unaryFunctionClass) {
+var TCmdUnaryFunction = function(unaryFunctionClass) {
 
-    class StackCmdItem {
+    class CmdItem extends CmdBase {
         constructor() {
+            super();
+            /** @type {StackItem} */
+            this.item = null;
         }
 
-        execute(stack) {
-            let item = stack.pop();
-            stack.push(new unaryFunctionClass(item));
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            this.item = calc.stack.pop();
+            calc.stack.push(new unaryFunctionClass(this.item));
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
+            calc.stack.push(this.item);
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
 }
 
-var TStackCmdBinaryFunction = function(binaryFunctionClass) {
+var TCmdBinaryFunction = function(binaryFunctionClass) {
 
-    class StackCmdItem {
+    class CmdItem {
         constructor() {
         }
 
-        execute(stack) {
-            let item2 = stack.pop();
-            let item1 = stack.pop();
-            stack.push(new binaryFunctionClass(item1, item2));
+        execute(calc) {
+            let item2 = calc.stack.pop();
+            let item1 = calc.stack.pop();
+            calc.stack.push(new binaryFunctionClass(item1, item2));
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
 }
 
 /**
  * 
- * @param {Array.<StackCmdBase>} commands 
+ * @param {Array.<CmdBase>} commands 
  */
-var TStackCmdChain = function(commands){
+var TCmdChain = function(commands){
 
-    class StackCmdItem {
+    class CmdItem extends CmdBase{
         constructor() {
+            super();
+            /** @type {Array.<CmdBase>} */
             this.commands = commands;
         }
-        execute(stack) {
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
             for(let command of this.commands) {
                 let cmdInstance = new command();
-                cmdInstance.execute(stack);
+                calc.executeCommand(cmdInstance);
+            }
+        }
+
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            for(let command of this.commands) {
+                calc.undoCommand();
             }
         }
     }
 
-    return StackCmdItem;
+    return CmdItem;
+};
+
+/**
+ * 
+ * @param {StackItem} value 
+ */
+var TCmdPushValue = function(value){
+
+    class CmdItem extends CmdBase {
+        constructor() {
+            super();
+            /** @type {StackItem} */
+            this.value = value;
+        }
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            calc.stack.push(value);
+        }
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            calc.stack.pop();
+        }
+    }
+
+    return CmdItem;
+};
+
+/**
+ * 
+ * @param {String} name
+ * @param {StackItem} value 
+ */
+var TCmdStoreValue = function(name, value){
+
+    class CmdItem extends CmdBase {
+        constructor() {
+            super();
+            /** @type {String} */
+            this.name = name;
+            /** @type {StackItem} */
+            this.value = value;
+            /** @type {StackItem} */
+            this.previousValue = null;
+        }
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        execute(calc) {
+            if(calc.rootNamespace.containsValue(this.name)) {
+                this.previousValue = calc.rootNamespace.getValue(this.name);
+            }
+            calc.rootNamespace.addValue(this.name, this.value);
+        }
+        /**
+         * @inheritdoc
+         * @param {Calc} calc 
+         */
+        undo(calc) {
+            if(this.previousValue === null) {
+                calc.rootNamespace.removeValue(this.name);
+            } else {
+                calc.rootNamespace.addValue(this.name, this.previousValue);
+            }
+            calc.stack.push(this.value);
+        }
+    }
+
+    return CmdItem;
 };
