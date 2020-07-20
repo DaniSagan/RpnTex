@@ -1092,6 +1092,15 @@ class Equality extends BinaryOperation {
     rhs_needs_parentheses() {
         return false;
     }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let lhsInnerValue = this.lhs.numericValue;
+        let rhsInnerValue = this.rhs.numericValue;
+        return new Equality(lhsInnerValue, rhsInnerValue);
+    }
 }
 
 class SuperSubScriptOperation extends StackItem {
@@ -1140,5 +1149,15 @@ class Integral extends SuperSubScriptOperation {
         }
         res += ` ${this.value.formatLatex()} \\mathrm{d}${this.differential.formatLatex()}`;
         return res;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        let subscriptInnerValue = this.subscript.numericValue;
+        let superscriptInnerValue = this.superscript.numericValue;
+        return new Integral(innerValue, this.differential, subscriptInnerValue, superscriptInnerValue);
     }
 }

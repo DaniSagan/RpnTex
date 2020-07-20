@@ -160,10 +160,14 @@ function onTestChange() {
 
 function process() {
     let words = document.getElementById("commandArea").value;
-    for(let word of words.split(" ")) {
-        if(word != "") {
-            calc.process(word) /** @type {boolean} */
+    if(words != "") {
+        for(let word of words.split(" ")) {
+            if(word != "") {
+                calc.process(word) /** @type {boolean} */
+            }
         }
+    } else {
+        calc.process("num");
     }
     updateStackTextArea();
     updateEquationText();
