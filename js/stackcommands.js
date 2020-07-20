@@ -656,6 +656,32 @@ class CmdLn extends CmdBase {
     }
 }
 
+class CmdFactorial extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Factorial(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
 class CmdEquality extends CmdBase {
     constructor() {
         super();

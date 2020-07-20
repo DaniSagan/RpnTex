@@ -17,6 +17,7 @@ calc.registerWord("cos", CmdCos);
 calc.registerWord("tan", CmdTan);
 calc.registerWord("log", CmdLog);
 calc.registerWord("ln", CmdLn);
+calc.registerWord("!", CmdFactorial);
 calc.registerWord("diff", CmdDifferential);
 calc.registerWord("integral", CmdIndefiniteIntegral);
 calc.registerWord("defintegral", CmdDefiniteIntegral);
@@ -494,6 +495,7 @@ function updateKeyboard() {
         new KeyboardButton("tan", () => processWord("sin"), "button-w1"),
         new KeyboardButton("log", () => processWord("sin"), "button-w1"),
         new KeyboardButton("ln", () => processWord("sin"), "button-w1"),
+        new KeyboardButton("!", () => processWord("!"), "button-w1"),
     ]);
 
     let keyboardGroupDiv = document.createElement('div');

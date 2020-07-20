@@ -556,6 +556,72 @@ class Ln extends Log {
     }
 }
 
+class Factorial extends UnaryOperation {
+    constructor(value) {
+        super(value);
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Integer) {
+            /** @type {number} */
+            let value = innerValue.value;
+            /** @type {number} */
+            let res = 1;
+            for(let n = 1; n <= value; n++) {
+                res *= n;
+            }
+            return new Integer(res);
+        } else {
+            return new Factorial(innerValue);
+        }
+    }
+
+    /**
+     * @private
+     * @param {StackItem} value 
+     */
+    needsParentheses(value) {
+        if(value instanceof Integer ||
+           value instanceof Real ||
+           value instanceof Variable || 
+           value instanceof Constant) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        if(this.needsParentheses(this.value)) {
+            return `(${this.value.toString()})!`;
+        } else {
+            return `${this.value.toString()}!`;
+        }
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        if(this.needsParentheses(this.value)) {
+            return `\\left(${this.value.formatLatex()}\\right)!`;
+        } else {
+            return `${this.value.formatLatex()}!`;
+        }
+    }
+}
+
+// ----------------------------------------------------------------
+// Binary operations
+// ----------------------------------------------------------------
+
 class BinaryOperation extends StackItem {
     /**
      * @param {StackItem} lhs
