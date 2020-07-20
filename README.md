@@ -39,6 +39,18 @@ You can use greek letters by using the greek keyboard from the application, or b
 gr.alpha
 ```
 
+Note that *gr.pi* is not the matemathical constant (3.14159...), but a generic variable with no assigned value. For using the mathematical constant, use the command *c.pi*:
+```
+c.pi
+```
+
+The same applies to the variable *e*. For the Euler constant, you have to use the command *c.e*:
+```
+c.e
+```
+
+You can see the difference applying numerical evaluation on both symbols.
+
 Values can be stored in a variable. For that, prefix the variable name with *@*, and the value at the top of the stack will be stored with that name:
 ```
 42 @meaning_of_life
@@ -49,7 +61,7 @@ For retrieving the value, just type the name of the variable without the *@* sym
 meaning_of_life
 ```
 
-You can store any kind of value, not only numerical values.
+You can store any kind of value, not only numerical values. For example, an entire equation:
 ```
 F G m_1 m_2 * r sq / * = @newton
 ```
