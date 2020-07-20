@@ -341,13 +341,14 @@ function updateKeyboard() {
 
         new KeyboardButton("drop", () => processWord(".."), "button-w2"),
         new KeyboardButton("dup", () => processWord("."), "button-w2"),
+        new KeyboardButton("undo", () => processWord("undo"), "button-w2"),
         new KeyboardButton("x", () => processWord("x"), "button-w1"),
         new KeyboardButton("y", () => processWord("y"), "button-w1"),
         new KeyboardButton("z", () => processWord("z"), "button-w1"),
         new KeyboardButton("d", () => processWord("diff"), "button-w1"),
+
         new KeyboardButton("∫", () => processWord("integral"), "button-w1"),
         new KeyboardButton("√", () => processWord("sqrt"), "button-w1"),
-
         new KeyboardButton("^", () => processWord("pow"), "button-w1"),
         new KeyboardButton("=", () => processWord("="), "button-w1"),
         new KeyboardButton("inv", () => processWord("inv"), "button-w2"),
