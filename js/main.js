@@ -494,12 +494,12 @@ function updateKeyboard() {
     ]);
 
     let keyboardGroupOperations = new KeyboardGroup("operations", "Fn", "Operations", [
-        new KeyboardButton("sin", () => processWord("sin"), "button-w1"),
-        new KeyboardButton("cos", () => processWord("sin"), "button-w1"),
-        new KeyboardButton("tan", () => processWord("sin"), "button-w1"),
-        new KeyboardButton("log", () => processWord("sin"), "button-w1"),
-        new KeyboardButton("ln", () => processWord("sin"), "button-w1"),
-        new KeyboardButton("!", () => processWord("!"), "button-w1"),
+        new KeyboardButton("sin", () => processWord("sin"), "button-w2"),
+        new KeyboardButton("cos", () => processWord("cos"), "button-w2"),
+        new KeyboardButton("tan", () => processWord("tan"), "button-w2"),
+        new KeyboardButton("log", () => processWord("log"), "button-w2"),
+        new KeyboardButton("ln", () => processWord("ln"), "button-w2"),
+        new KeyboardButton("!", () => processWord("!"), "button-w2"),
     ]);
 
     let keyboardGroupDiv = document.createElement('div');
