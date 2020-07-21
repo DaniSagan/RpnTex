@@ -323,6 +323,42 @@ class Abs extends UnaryOperation {
     }
 }
 
+class Norm extends UnaryOperation {
+    /**
+     * @param {StackItem} value
+     */
+    constructor(value) {
+        super(value);
+    }
+
+    /**
+     * @return {String}
+     */
+    toString() {
+        return `‖${this.value.toString()}‖`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\left\\|${this.value.formatLatex()}\\right\\|`;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let innerValue = this.value.numericValue;
+        if(innerValue instanceof Vector2) {
+            let res = new Sqrt(new Sum(new Power(innerValue.x, new Integer(2)), new Power(innerValue.y, new Integer(2))));
+            return res.numericValue;
+        } else {
+            return new Norm(innerValue.value);
+        }
+    }
+}
+
 class Neg extends UnaryOperation {
     /**
      * @param {StackItem} value
@@ -763,6 +799,11 @@ class Sum extends BinaryOperation {
         } else if(lhsInnerValue instanceof Real &&
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value + rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Vector2 &&
+                  rhsInnerValue instanceof Vector2) {
+            let xSum = new Sum(lhsInnerValue.x, rhsInnerValue.x); 
+            let ySum = new Sum(lhsInnerValue.y, rhsInnerValue.y);
+            return new Vector2(xSum.numericValue, ySum.numericValue);
         } else {
             return new Sum(lhsInnerValue, rhsInnerValue);
         }
@@ -788,7 +829,8 @@ class Subtraction extends BinaryOperation {
            this.lhs instanceof Subtraction || 
            this.lhs instanceof Fraction || 
            this.lhs instanceof Variable ||
-           this.lhs instanceof Abs) {
+           this.lhs instanceof Abs ||
+           this.lhs instanceof Vector2) {
             return false;
         }
         return true;
@@ -802,7 +844,8 @@ class Subtraction extends BinaryOperation {
            this.rhs instanceof Real  || 
            this.lhs instanceof Fraction || 
            this.rhs instanceof Variable||
-           this.rhs instanceof Abs) {
+           this.rhs instanceof Abs ||
+           this.rhs instanceof Vector2) {
             return false;
         }
         return true;
@@ -826,6 +869,11 @@ class Subtraction extends BinaryOperation {
         } else if(lhsInnerValue instanceof Real &&
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value - rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Vector2 &&
+                  rhsInnerValue instanceof Vector2) {
+            let xValue = new Subtraction(lhsInnerValue.x, rhsInnerValue.x); 
+            let yValue = new Subtraction(lhsInnerValue.y, rhsInnerValue.y);
+            return new Vector2(xValue.numericValue, yValue.numericValue);
         } else {
             return new Subtraction(lhsInnerValue, rhsInnerValue);
         }
@@ -1159,5 +1207,38 @@ class Integral extends SuperSubScriptOperation {
         let subscriptInnerValue = this.subscript.numericValue;
         let superscriptInnerValue = this.superscript.numericValue;
         return new Integral(innerValue, this.differential, subscriptInnerValue, superscriptInnerValue);
+    }
+}
+
+class Vector2 extends StackItem {
+    constructor(x, y) {
+        super();
+        /** @type {StackItem} */
+        this.x = x;
+        /** @type {StackItem} */
+        this.y = y;
+    }
+
+    /**
+     * @returns {String}
+     */
+    toString() {
+        return `(${this.x.toString()}, ${this.y.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\begin{bmatrix}${this.x.formatLatex()}\\\\${this.y.formatLatex()}\\end{bmatrix}`;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        let xInnerValue = this.x.numericValue;
+        let yInnerValue = this.y.numericValue;
+        return new Vector2(xInnerValue, yInnerValue);
     }
 }
