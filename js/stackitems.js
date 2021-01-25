@@ -722,6 +722,14 @@ class BinaryOperation extends StackItem {
     get children() {
         return [this.lhs, this.rhs];
     }
+
+    matchType(TClass) {
+        return this.lhs instanceof TClass && this.rhs instanceof TClass;
+    }
+
+    matchTypes(TLhsClass, TRhsClass) {
+        return this.lhs instanceof TLhsClass && this.rhs instanceof TRhsClass;
+    }
 }
 
 class Sum extends BinaryOperation {
@@ -902,7 +910,9 @@ class Multiplication extends BinaryOperation {
            this.lhs instanceof Fraction ||
            this.lhs instanceof Abs ||
            this.lhs instanceof Differential ||
-           this.lhs instanceof Integral) {
+           this.lhs instanceof Integral ||
+           this.lhs instanceof Vector2 || 
+           this.lhs instanceof Constant) {
             return false;
         }
         return true;
@@ -921,7 +931,9 @@ class Multiplication extends BinaryOperation {
            this.rhs instanceof Fraction ||
            this.rhs instanceof Abs ||
            this.rhs instanceof Differential ||
-           this.rhs instanceof Integral) {
+           this.rhs instanceof Integral ||
+           this.rhs instanceof Vector2 || 
+           this.rhs instanceof Constant) {
             return false;
         }
         return true;
@@ -945,6 +957,26 @@ class Multiplication extends BinaryOperation {
         } else if(lhsInnerValue instanceof Real &&
                   rhsInnerValue instanceof Real) {
             return new Real(lhsInnerValue.value * rhsInnerValue.value);
+        } else if(lhsInnerValue instanceof Integer &&
+                  rhsInnerValue instanceof Vector2) {
+            let x = new Multiplication(lhsInnerValue, rhsInnerValue.x);
+            let y = new Multiplication(lhsInnerValue, rhsInnerValue.y);
+            return new Vector2(x.numericValue, y.numericValue);
+        } else if(lhsInnerValue instanceof Vector2 &&
+                  rhsInnerValue instanceof Integer) {
+            let x = new Multiplication(lhsInnerValue.x, rhsInnerValue);
+            let y = new Multiplication(lhsInnerValue.y, rhsInnerValue);
+            return new Vector2(x.numericValue, y.numericValue);
+        } else if(lhsInnerValue instanceof Real &&
+                  rhsInnerValue instanceof Vector2) {
+            let x = new Multiplication(lhsInnerValue, rhsInnerValue.x);
+            let y = new Multiplication(lhsInnerValue, rhsInnerValue.y);
+            return new Vector2(x.numericValue, y.numericValue);
+        } else if(lhsInnerValue instanceof Vector2 &&
+                  rhsInnerValue instanceof Real) {
+            let x = new Multiplication(lhsInnerValue.x, rhsInnerValue);
+            let y = new Multiplication(lhsInnerValue.y, rhsInnerValue);
+            return new Vector2(x.numericValue, y.numericValue);
         } else {
             return new Multiplication(lhsInnerValue, rhsInnerValue);
         }
