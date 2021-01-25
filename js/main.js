@@ -118,6 +118,10 @@ calc.registerWord("c.phi", TCmdConstant(new GreekVariable("φ", "varphi"), new R
 
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
+calc.registerEvaluator("integerreal-sum", IntegerRealSumEvaluator);
+calc.registerEvaluator("integer-multiplication", IntegerMultiplicationEvaluator);
+calc.registerEvaluator("distribute-multiplication", DistributeMultiplicationEvaluator);
+calc.registerEvaluator("commute-sum", CommuteSumEvaluator);
 
 function init() {
     updateKeyboard();
