@@ -294,6 +294,32 @@ class CmdAbs extends CmdBase {
     }
 }
 
+class CmdNorm extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Norm(this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
 class CmdSum extends CmdBase {
     constructor() {
         super();
@@ -803,6 +829,34 @@ class CmdDefiniteIntegral extends CmdBase {
         calc.stack.push(this.itemSuperScript);
         calc.stack.push(this.itemValue);
         calc.stack.push(this.itemDifferential);
+    }
+}
+
+class CmdVector2 extends CmdBase {
+    constructor() {
+        super();
+        this.itemX = null;
+        this.itemY = null;
+    }
+
+    /**
+     * 
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.itemY = calc.stack.pop();
+        this.itemX = calc.stack.pop();
+        calc.stack.push(new Vector2(this.itemX, this.itemY));
+    }
+
+    /**
+     * 
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.itemX);
+        calc.stack.push(this.itemY);
     }
 }
 

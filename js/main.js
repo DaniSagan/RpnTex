@@ -7,6 +7,7 @@ calc.registerWord("-", CmdSubtraction);
 calc.registerWord("*", CmdMultiplication);
 calc.registerWord("/", CmdFraction);
 calc.registerWord("abs", CmdAbs);
+calc.registerWord("norm", CmdNorm);
 calc.registerWord("^", CmdPower);
 calc.registerWord("pow", CmdPower);
 calc.registerWord("inv", CmdInv);
@@ -22,6 +23,7 @@ calc.registerWord("diff", CmdDifferential);
 calc.registerWord("integral", CmdIndefiniteIntegral);
 calc.registerWord("defintegral", CmdDefiniteIntegral);
 calc.registerWord("sq", TCmdChain([TCmdInteger(2), CmdPower]));
+calc.registerWord("vec2", CmdVector2);
 
 calc.registerWord("=", CmdEquality);
 calc.registerWord(".", CmdDup);
@@ -116,6 +118,10 @@ calc.registerWord("c.phi", TCmdConstant(new GreekVariable("φ", "varphi"), new R
 
 calc.registerEvaluator("integer-sum", IntegerSumEvaluator);
 calc.registerEvaluator("suminteger-sum", SumIntegerSumEvaluator);
+calc.registerEvaluator("integerreal-sum", IntegerRealSumEvaluator);
+calc.registerEvaluator("integer-multiplication", IntegerMultiplicationEvaluator);
+calc.registerEvaluator("distribute-multiplication", DistributeMultiplicationEvaluator);
+calc.registerEvaluator("commute-sum", CommuteSumEvaluator);
 
 function init() {
     updateKeyboard();
