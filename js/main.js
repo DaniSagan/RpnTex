@@ -24,6 +24,7 @@ calc.registerWord("integral", CmdIndefiniteIntegral);
 calc.registerWord("defintegral", CmdDefiniteIntegral);
 calc.registerWord("sq", TCmdChain([TCmdInteger(2), CmdPower]));
 calc.registerWord("vec2", CmdVector2);
+calc.registerWord("ddx", CmdDerivativeX);
 
 calc.registerWord("=", CmdEquality);
 calc.registerWord(".", CmdDup);
@@ -122,6 +123,10 @@ calc.registerEvaluator("integerreal-sum", IntegerRealSumEvaluator);
 calc.registerEvaluator("integer-multiplication", IntegerMultiplicationEvaluator);
 calc.registerEvaluator("distribute-multiplication", DistributeMultiplicationEvaluator);
 calc.registerEvaluator("commute-sum", CommuteSumEvaluator);
+calc.registerEvaluator("compute-power", IntegerPowerEvaluator);
+calc.registerEvaluator("compute-power", VariableMultiplicationEvaluator);
+calc.registerEvaluator("multiply-sums", SumMultiplicationEvaluator);
+calc.registerEvaluator("derivative", DerivativeEvaluator);
 
 function init() {
     updateKeyboard();
@@ -247,11 +252,23 @@ function updateMenu() {
             let evaluator = new calc.evaluatorDict[evaluatorKey]();
             if(evaluator.canApply(calc.selectedItem)) {
                 /** @type {StackItem} */
-                let evaluatedItem = evaluator.eval(calc.selectedItem);
+                let evaluatedItem = evaluator.eval(calc.selectedItem.clone());
                 let button = document.createElement('button');  
-                button.innerText = evaluator.getDescription(calc.selectedItem);
+                button.innerText = evaluator.getDescription(calc.selectedItem) + " --> " + evaluatedItem.toString();
+                let itemId = calc.selectedItem.id;
                 button.onclick = function() {
-                    processAction(calc.selectedItem.id, evaluatorKey);
+                    processAction(itemId, evaluatorKey);
+                };
+                menuDiv.appendChild(button);
+            }
+            if(calc.selectedItem.parent != null && evaluator.canApply(calc.selectedItem.parent)) {
+                /** @type {StackItem} */
+                let evaluatedItem = evaluator.eval(calc.selectedItem.parent.clone());
+                let button = document.createElement('button');  
+                button.innerText = evaluator.getDescription(calc.selectedItem.parent) + " --> " + evaluatedItem.toString();
+                let itemId = calc.selectedItem.parent.id;
+                button.onclick = function() {
+                    processAction(itemId, evaluatorKey);
                 };
                 menuDiv.appendChild(button);
             }              
@@ -551,7 +568,9 @@ document.getElementById("equationArea").onmouseover = function(e) {
                 let evaluator = new calc.evaluatorDict[evaluatorKey]();
                 if(evaluator.canApply(selectedItem)) {
                     this.style.cursor = 'pointer';
-                }              
+                } else if(selectedItem.parent != null && evaluator.canApply(selectedItem.parent)) {
+                    this.style.cursor = 'pointer';
+                }               
             }
         }
     }     
@@ -559,7 +578,7 @@ document.getElementById("equationArea").onmouseover = function(e) {
 
 document.getElementById("equationArea").onclick = function(e) {
     let selectedItem = e.target.closest(".rpntex-item");
-    if(selectedItem.id != "") {
+    if(selectedItem != null && selectedItem.id != "") {
         /** @type {StackItem} */
         let rootItem = calc.stack.items[0];
         /** @type {StackItem} */

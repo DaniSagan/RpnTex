@@ -10,7 +10,7 @@ class StackItem {
         /** @type {String} */
         this.className = "rpntex-item";
         /** @type {StackItem} */ 
-        this.parent = parent;
+        this.parent = null;
     }
 
     /**
@@ -81,6 +81,11 @@ class StackItem {
     get numericValue() {
         return this;
     }
+
+    clone() {
+        let cloned = new StackItem();
+        return cloned;
+    }
 }
 
 class Integer extends StackItem {
@@ -105,6 +110,11 @@ class Integer extends StackItem {
     formatInnerLatex() {
         return this.value.toString();
     }
+
+    clone() {
+        let cloned = new Integer(this.value);
+        return cloned;
+    }
 }
 
 class Real extends StackItem {
@@ -128,6 +138,11 @@ class Real extends StackItem {
      */
     formatInnerLatex() {
         return this.value.toString();
+    }
+
+    clone() {
+        let cloned = new Real(this.value);
+        return cloned;
     }
 }
 
@@ -155,6 +170,11 @@ class Variable extends StackItem {
         // return `{\\color{red}{${this.name}}}`;
         return `${this.name}`;
     }
+
+    clone() {
+        let cloned = new Variable(this.name);
+        return cloned;
+    }
 }
 
 class GreekVariable extends Variable {
@@ -179,6 +199,11 @@ class GreekVariable extends Variable {
      */
     formatInnerLatex() {
         return `\\${this.latexCommand}`;
+    }
+
+    clone() {
+        let cloned = new GreekVariable(this.name, this.latexCommand);
+        return cloned;
     }
 }
 
@@ -216,6 +241,11 @@ class Constant extends StackItem {
     get numericValue() {
         return this.value.numericValue;
     }
+
+    clone() {
+        let cloned = new Constant(this.variable.clone(), this.value.clone());
+        return cloned;
+    }
 }
 
 class UnaryOperation extends StackItem {
@@ -226,6 +256,7 @@ class UnaryOperation extends StackItem {
         super();
         /** @type {StackItem} */
         this.value = value;
+        this.value.parent = this;
     }
 
     /**
@@ -284,6 +315,11 @@ class Sqrt extends UnaryOperation {
             return new Sqrt(innerValue);
         }
     }
+
+    clone() {
+        let cloned = new Sqrt(this.value.clone());
+        return cloned;
+    }
 }
 
 class Abs extends UnaryOperation {
@@ -321,6 +357,11 @@ class Abs extends UnaryOperation {
             return new Abs(innerValue.value);
         }
     }
+
+    clone() {
+        let cloned = new Abs(this.value.clone());
+        return cloned;
+    }
 }
 
 class Norm extends UnaryOperation {
@@ -356,6 +397,11 @@ class Norm extends UnaryOperation {
         } else {
             return new Norm(innerValue.value);
         }
+    }
+
+    clone() {
+        let cloned = new Norm(this.value.clone());
+        return cloned;
     }
 }
 
@@ -410,6 +456,11 @@ class Neg extends UnaryOperation {
             return new Neg(innerValue);
         }
     }
+
+    clone() {
+        let cloned = new Neg(this.value.clone());
+        return cloned;
+    }    
 }
 
 class Differential extends UnaryOperation {
@@ -429,6 +480,11 @@ class Differential extends UnaryOperation {
      */
     formatInnerLatex() {
         return `\\mathrm{d}${this.value.formatLatex()}`
+    }
+
+    clone() {
+        let cloned = new Differential(this.value.clone());
+        return cloned;
     }
 }
 
@@ -456,6 +512,11 @@ class UnaryFunction extends UnaryOperation {
     formatInnerLatex() {
         return `\\${this.functionName}\\left(${this.value.formatLatex()}\\right)`
     }
+
+    clone() {
+        let cloned = new UnaryFunction(this.value.clone(), this.functionName);
+        return cloned;
+    }
 }
 
 class Sin extends UnaryFunction {
@@ -479,6 +540,11 @@ class Sin extends UnaryFunction {
             return new Sin(innerValue);
         }
     }
+
+    clone() {
+        let cloned = new Sin(this.value.clone());
+        return cloned;
+    }
 }
 
 class Cos extends UnaryFunction {
@@ -498,6 +564,11 @@ class Cos extends UnaryFunction {
             return new Cos(innerValue);
         }
     }
+
+    clone() {
+        let cloned = new Cos(this.value.clone());
+        return cloned;
+    }
 }
 
 class Tan extends UnaryFunction {
@@ -516,6 +587,11 @@ class Tan extends UnaryFunction {
         } else {
             return Tan(innerValue);
         }
+    }
+
+    clone() {
+        let cloned = new Tan(this.value.clone());
+        return cloned;
     }
 }
 
@@ -558,6 +634,11 @@ class Log extends UnaryFunction {
     formatInnerLatex() {
         return `\\${this.functionName}_{${this.base.formatLatex()}}\\left(${this.value.formatLatex()}\\right)`
     }
+
+    clone() {
+        let cloned = new Log(this.base.clone(), this.value.clone());
+        return cloned;
+    }
 }
 
 class Ln extends Log {
@@ -589,6 +670,11 @@ class Ln extends Log {
      */
     formatInnerLatex() {
         return `\\ln\\left(${this.value.formatLatex()}\\right)`
+    }
+
+    clone() {
+        let cloned = new Ln(this.value.clone());
+        return cloned;
     }
 }
 
@@ -652,6 +738,11 @@ class Factorial extends UnaryOperation {
             return `${this.value.formatLatex()}!`;
         }
     }
+
+    clone() {
+        let cloned = new Factorial(this.value.clone());
+        return cloned;
+    }
 }
 
 // ----------------------------------------------------------------
@@ -666,9 +757,29 @@ class BinaryOperation extends StackItem {
      */
     constructor(lhs, rhs, operator) {
         super();
-        this.lhs = lhs;
-        this.rhs = rhs;
+        this._lhs = lhs;
+        this._lhs.parent = this;
+        this._rhs = rhs;
+        this._rhs.parent = this;
         this.operator = operator;
+    }
+
+    set lhs(value) {
+        this._lhs = value;
+        this._lhs.parent = this;
+    }
+
+    get lhs() {
+        return this._lhs;
+    }
+
+    set rhs(value) {
+        this._rhs = value;
+        this._rhs.parent = this;
+    }
+
+    get rhs() {
+        return this._rhs;
     }
 
     /**
@@ -729,6 +840,11 @@ class BinaryOperation extends StackItem {
 
     matchTypes(TLhsClass, TRhsClass) {
         return this.lhs instanceof TLhsClass && this.rhs instanceof TRhsClass;
+    }
+
+    clone() {
+        let cloned = new BinaryOperation(this.lhs.clone(), this.rhs.clone(), this.operator);
+        return cloned;
     }
 }
 
@@ -816,6 +932,11 @@ class Sum extends BinaryOperation {
             return new Sum(lhsInnerValue, rhsInnerValue);
         }
     }
+
+    clone() {
+        let cloned = new Sum(this.lhs.clone(), this.rhs.clone());
+        return cloned;
+    }
 }
 
 class Subtraction extends BinaryOperation {
@@ -885,6 +1006,11 @@ class Subtraction extends BinaryOperation {
         } else {
             return new Subtraction(lhsInnerValue, rhsInnerValue);
         }
+    }
+
+    clone() {
+        let cloned = new Subtraction(this.lhs.clone(), this.rhs.clone());
+        return cloned;
     }
 }
 
@@ -981,6 +1107,11 @@ class Multiplication extends BinaryOperation {
             return new Multiplication(lhsInnerValue, rhsInnerValue);
         }
     }
+
+    clone() {
+        let cloned = new Multiplication(this.lhs.clone(), this.rhs.clone());
+        return cloned;
+    }
 }
 
 class Fraction extends BinaryOperation {
@@ -1067,6 +1198,11 @@ class Fraction extends BinaryOperation {
             return new Fraction(lhsInnerValue, rhsInnerValue);;
         }
     }
+
+    clone() {
+        let cloned = new Fraction(this.lhs.clone(), this.rhs.clone());
+        return cloned;
+    }
 }
 
 class Power extends BinaryOperation {
@@ -1148,6 +1284,11 @@ class Power extends BinaryOperation {
             return new Power(lhsInnerValue, rhsInnerValue);
         }
     }
+
+    clone() {
+        let cloned = new Power(this.lhs.clone(), this.rhs.clone());
+        return cloned;
+    }
 }
 
 class Equality extends BinaryOperation {
@@ -1180,6 +1321,11 @@ class Equality extends BinaryOperation {
         let lhsInnerValue = this.lhs.numericValue;
         let rhsInnerValue = this.rhs.numericValue;
         return new Equality(lhsInnerValue, rhsInnerValue);
+    }
+
+    clone() {
+        let cloned = new Equality(this.lhs.clone(), this.rhs.clone());
+        return cloned;
     }
 }
 
@@ -1240,6 +1386,11 @@ class Integral extends SuperSubScriptOperation {
         let superscriptInnerValue = this.superscript.numericValue;
         return new Integral(innerValue, this.differential, subscriptInnerValue, superscriptInnerValue);
     }
+
+    clone() {
+        let cloned = new Integral(this.lhs.clone(), this.rhs.clone(), this.differential.clone(), this.subscript.clone(), this.superscript.clone());
+        return cloned;
+    }
 }
 
 class Vector2 extends StackItem {
@@ -1247,8 +1398,10 @@ class Vector2 extends StackItem {
         super();
         /** @type {StackItem} */
         this.x = x;
+        this.x.parent = this;
         /** @type {StackItem} */
         this.y = y;
+        this.y.parent = this;
     }
 
     /**
@@ -1272,5 +1425,48 @@ class Vector2 extends StackItem {
         let xInnerValue = this.x.numericValue;
         let yInnerValue = this.y.numericValue;
         return new Vector2(xInnerValue, yInnerValue);
+    }
+
+    clone() {
+        let cloned = new Vector2(this.x.clone(), this.y.clone());
+        return cloned;
+    }
+}
+
+class Derivative extends StackItem {
+    constructor(variable, value) {
+        super();
+        /** @type {StackItem} */
+        this.variable = variable;
+        this.variable.parent = this;
+        /** @type {StackItem} */
+        this.value = value;
+        this.value.parent = this;
+    }
+
+    /**
+     * @returns {String}
+     */
+    toString() {
+        return `d/d${this.variable.toString()}(${this.value.toString()})`;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        return `\\frac{d}{d${this.variable.formatLatex()}}\\left(${this.value.formatLatex()}\\right)`;
+    }
+
+    /**
+     * @returns {StackItem}
+     */
+    get numericValue() {
+        return this;
+    }
+
+    clone() {
+        let cloned = new Derivative(this.variable.clone(), this.value.clone());
+        return cloned;
     }
 }

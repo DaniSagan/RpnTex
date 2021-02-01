@@ -939,6 +939,32 @@ class CmdSwap extends CmdBase {
     }
 }
 
+class CmdDerivativeX extends CmdBase {
+    constructor() {
+        super();
+        /** @type {StackItem} */
+        this.item = null;
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    execute(calc) {
+        this.item = calc.stack.pop();
+        calc.stack.push(new Derivative(new Variable("x"), this.item));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {Calc} calc 
+     */
+    undo(calc) {
+        calc.stack.pop();
+        calc.stack.push(this.item);
+    }
+}
+
 /**
  * 
  * @param {number} value
