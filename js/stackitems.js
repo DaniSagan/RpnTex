@@ -82,9 +82,21 @@ class StackItem {
         return this;
     }
 
+    /**
+     * @returns {StackItem}
+     */
     clone() {
         let cloned = new StackItem();
         return cloned;
+    }
+
+    /**
+     * 
+     * @param {StackItem} other 
+     * @returns {boolean}
+     */
+    equals(other) {
+        return false;
     }
 }
 
@@ -115,6 +127,13 @@ class Integer extends StackItem {
         let cloned = new Integer(this.value);
         return cloned;
     }
+
+    equals(other) {
+        if(other instanceof Integer) {
+            return other.value === this.value;
+        }
+        return false;
+    }
 }
 
 class Real extends StackItem {
@@ -143,6 +162,13 @@ class Real extends StackItem {
     clone() {
         let cloned = new Real(this.value);
         return cloned;
+    }
+
+    equals(other) {
+        if(other instanceof Real) {
+            return other.value === this.value;
+        }
+        return false;
     }
 }
 
@@ -175,6 +201,13 @@ class Variable extends StackItem {
         let cloned = new Variable(this.name);
         return cloned;
     }
+
+    equals(other) {
+        if(other instanceof Variable) {
+            return other.name === this.name;
+        }
+        return false;
+    }
 }
 
 class GreekVariable extends Variable {
@@ -204,6 +237,13 @@ class GreekVariable extends Variable {
     clone() {
         let cloned = new GreekVariable(this.name, this.latexCommand);
         return cloned;
+    }
+
+    equals(other) {
+        if(other instanceof GreekVariable) {
+            return other.name === this.name && other.latexCommand === this.latexCommand;
+        }
+        return false;
     }
 }
 
@@ -246,6 +286,13 @@ class Constant extends StackItem {
         let cloned = new Constant(this.variable.clone(), this.value.clone());
         return cloned;
     }
+
+    equals(other) {
+        if(other instanceof Constant) {
+            return other.variable.equals(this.variable) && other.value.equals(this.value);
+        }
+        return false;
+    }
 }
 
 class UnaryOperation extends StackItem {
@@ -272,6 +319,13 @@ class UnaryOperation extends StackItem {
      */
     get children() {
         return [this.value];
+    }
+
+    equals(other) {
+        if(other instanceof UnaryOperation) {
+            return other.value.equals(this.value);
+        }
+        return false;
     }
 }
 
@@ -838,13 +892,46 @@ class BinaryOperation extends StackItem {
         return this.lhs instanceof TClass && this.rhs instanceof TClass;
     }
 
+    /**
+     * 
+     * @param {Class} TLhsClass 
+     * @param {Class} TRhsClass
+     * @returns {boolean} 
+     */
     matchTypes(TLhsClass, TRhsClass) {
         return this.lhs instanceof TLhsClass && this.rhs instanceof TRhsClass;
     }
 
+    /**
+     * @returns {BinaryOperation}
+     */
     clone() {
         let cloned = new BinaryOperation(this.lhs.clone(), this.rhs.clone(), this.operator);
         return cloned;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    isCommutable() {
+        return false;
+    }
+
+    /**
+     * 
+     * @override
+     * @param {StackItem} other
+     * @returns {boolean} 
+     */
+    equals(other) {
+        if(other instanceof BinaryOperation) {
+            if(!this.isCommutable()) {
+                return other.lhs.equals(this.lhs) && other.operator === this.operator && other.rhs.equals(this.rhs);
+            } else {
+                return (other.lhs.equals(this.lhs) && other.operator === this.operator && other.rhs.equals(this.rhs)) || 
+                       (other.lhs.equals(this.rhs) && other.operator === this.operator && other.rhs.equals(this.lhs));
+            }
+        }
     }
 }
 
@@ -936,6 +1023,22 @@ class Sum extends BinaryOperation {
     clone() {
         let cloned = new Sum(this.lhs.clone(), this.rhs.clone());
         return cloned;
+    }
+
+    /**
+     * @override
+     */
+    isCommutable() {
+        return true;
+    }
+
+    static multiSum(itemList) {
+        let res = new Sum(itemList[0], itemList[1]);
+        let k;
+        for(k = 2; k < itemList; k++) {
+            res = new Sum(res, itemList[k]);
+        }
+        return res;
     }
 }
 
@@ -1066,6 +1169,38 @@ class Multiplication extends BinaryOperation {
     }
 
     /**
+     * @return {String}
+     */
+    toString() {
+        var res = "";
+        res += this.lhs_needs_parentheses() ? "(" + this.lhs.toString() + ")" : this.lhs.toString();
+        res += this.needs_operator() ? this.operator : "";
+        res += this.rhs_needs_parentheses() ? "(" + this.rhs.toString() + ")" : this.rhs.toString();
+        return res;
+    }
+
+    /**
+     * @return {String}
+     */
+    formatInnerLatex() {
+        var res = "";
+        res += this.lhs_needs_parentheses() ? "\\left(" + this.lhs.formatLatex() + "\\right)" : this.lhs.formatLatex();
+        res += this.needs_operator() ? this.operator : "";
+        res += this.rhs_needs_parentheses() ? "\\left(" + this.rhs.formatLatex() + "\\right)" : this.rhs.formatLatex();
+        return res;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    needs_operator() {
+        if(this.lhs instanceof Integer && this.rhs instanceof Variable) {
+            return false
+        }
+        return true;
+    }
+
+    /**
      * @returns {StackItem}
      */
     get numericValue() {
@@ -1111,6 +1246,15 @@ class Multiplication extends BinaryOperation {
     clone() {
         let cloned = new Multiplication(this.lhs.clone(), this.rhs.clone());
         return cloned;
+    }
+
+    static multiMultiplication(itemList) {
+        let res = new Multiplication(itemList[0], itemList[1]);
+        let k;
+        for(k = 2; k < itemList; k++) {
+            res = new Multiplication(res, itemList[k]);
+        }
+        return res;
     }
 }
 

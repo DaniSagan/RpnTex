@@ -1,5 +1,242 @@
 'use strict';
 
+class Simplifier {
+    /**
+     * 
+     * @param {StackItem} item 
+     */
+    static simplify(item) {
+        if(item instanceof Sum) {
+            let s = SumSimplifier.process(item);
+            let lhs = this.simplify(item.lhs);
+            let rhs = this.simplify(item.rhs);
+            if(lhs instanceof Integer && rhs instanceof Integer) {
+                return new Integer(lhs.value + rhs.value);
+            }
+            if(lhs instanceof Integer && lhs.value == 0) {
+                return this.simplify(rhs);
+            }
+            if(rhs instanceof Integer && rhs.value == 0) {
+                return this.simplify(lhs);
+            }
+            if(lhs instanceof Variable && rhs instanceof Variable) {
+                if(lhs.name == rhs.name) {
+                    return new Multiplication(new Integer(2), lhs);
+                }
+            }
+            return new Sum(lhs, rhs);
+        }
+        if(item instanceof Subtraction) {
+            let lhs = this.simplify(item.lhs);
+            let rhs = this.simplify(item.rhs);
+            if(lhs instanceof Integer && rhs instanceof Integer) {
+                return new Integer(lhs.value - rhs.value);
+            }
+            if(lhs instanceof Integer && lhs.value == 0) {
+                return this.simplify(rhs);
+            }
+            if(rhs instanceof Integer && rhs.value == 0) {
+                return this.simplify(lhs);
+            }
+            if(lhs instanceof Variable && rhs instanceof Variable) {
+                if(lhs.name == rhs.name) {
+                    return new Integer(0);
+                }
+            }
+            return new Subtraction(lhs, rhs);
+        }
+        if(item instanceof Multiplication) {
+            let lhs = this.simplify(item.lhs);
+            let rhs = this.simplify(item.rhs);
+            if(lhs instanceof Integer && rhs instanceof Integer) {
+                return new Integer(lhs.value * rhs.value);
+            }
+            if(lhs instanceof Integer) {
+                if(lhs.value == 1) {
+                    return this.simplify(rhs);
+                } else if(lhs.value == 0) {
+                    return new Integer(0);
+                }
+            }
+            if(rhs instanceof Integer) {
+                if(rhs.value == 1) {
+                    return this.simplify(lhs);
+                } else if(lhs.value == 0) {
+                    return new Integer(0);
+                }
+            }
+            return new Multiplication(lhs, rhs);
+        }
+        if(item instanceof Fraction) {
+            let numerator = this.simplify(item.lhs);
+            let denominator = this.simplify(item.rhs);
+            if(denominator instanceof Integer) {
+                if(denominator.value == 1) {
+                    return numerator;
+                }
+            }
+            return new Fraction(numerator, denominator);
+        }
+        if(item instanceof Power) {
+            let base = this.simplify(item.lhs);
+            let exponent = this.simplify(item.rhs);
+            if(base instanceof Integer && exponent instanceof Integer) {
+                return item.numericValue();
+            }
+            if(base instanceof Integer) {
+                if(base.value == 1) {
+                    return base;
+                } else if(base.value == 0) {
+                    return new Integer(0);
+                }
+            }
+            if(exponent instanceof Integer) {
+                if(exponent.value == 1) {
+                    return base;
+                } else if(exponent.value == 0 && !(base instanceof Integer && base.value == 0)) {
+                    return new Integer(0);
+                }
+            }
+            return new Power(base, exponent);
+        }
+        return item;
+    }
+}
+
+class SumSimplifier {
+    constructor() {
+        this.sumList = [];
+        this.subList = [];
+    }
+
+    /**
+     * 
+     * @param {SumSimplifier} other 
+     */
+    combine(otherSumList, otherSubList) {
+        for(let p of otherSumList) {
+            this.sumList.push(p);
+        }
+        for(let n of otherSubList) {
+            this.subList.push(n);
+        }
+    }
+
+    simplify() {
+        /** @type {Array.<StackItem>} */
+        let valueList = [];
+        for(let s of this.sumList) {
+            if(s instanceof Integer) {
+                let found = false;
+                for(let v of valueList) {
+                    if(v.value instanceof Integer) {
+                        v.value.value += s.value;
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    valueList.push({value: s, count: 1});
+                }
+            } else {
+                let found = false;
+                for(let v of valueList) {
+                    if(v.value.equals(s)) {
+                        v.count++;
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    valueList.push({value: s, count: 1});
+                }
+            }
+        }
+        for(let n of this.subList) {
+            if(n instanceof Integer) {
+                let found = false;
+                for(let v of valueList) {
+                    if(v.value instanceof Integer) {
+                        v.value.value -= n.value;
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    valueList.push({value: new Integer(-n.value), count: 1});
+                }
+            } else {
+                let found = false;
+                for(let v of valueList) {
+                    if(v.value.equals(n)) {
+                        v.count--;
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    valueList.push({value: n, count: -1});
+                }
+            }
+        }
+        this.sumList = [];
+        this.subList = [];
+        for(let v of valueList) {
+            if(v.value instanceof Integer) {
+                if(v.count > 0) {
+                    this.sumList.push(new Integer(v.value.value * v.count));
+                } else if(v.count < 0) {
+                    this.subList.push(new Integer(v.value.value * Math.abs(v.count)));
+                }
+            } else {
+                if(v.count === 1) {
+                    this.sumList.push(v.value)
+                } else if(v.count > 1) {
+                    this.sumList.push(new Multiplication(new Integer(v.count), v.value));
+                } else if(v.count === -1) {
+                    this.subList.push(v.value);
+                } else if(v.count < -1) {
+                    this.subList.push(new Multiplication(new Integer(Math.abs(v.count)), v.value));
+                }
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {StackItem} item
+     * @returns {SumSimplifier} 
+     */
+    static process(item) {
+        let res = new SumSimplifier();
+        if(item instanceof Sum) {
+            let lhsS = SumSimplifier.process(item.lhs);
+            res.combine(lhsS.sumList, lhsS.subList);
+            let rhsS = SumSimplifier.process(item.rhs); 
+            res.combine(rhsS.sumList, rhsS.subList);         
+        } else if (item instanceof Subtraction) {
+            let lhsS = SumSimplifier.process(item.lhs);
+            res.combine(lhsS.sumList, lhsS.subList);
+            let rhsS = SumSimplifier.process(item.rhs); 
+            res.combine(rhsS.subList, rhsS.sumList);
+        } else {
+            res.sumList.push(item);
+        }
+        res.simplify();
+        return res;
+    }
+
+    /**
+     * @todo
+     * @returns {StackItem}
+     */
+    result() {
+        if(this.sumList.length == 0 && this.subList.length === 0){
+            return new Integer(0);
+        } else if(this.sumList.length > 0) {
+            for(let s of this.sumList) {
+                
+            }
+        }
+    }
+}
+
 class Evaluator {
     /**
      * 
@@ -531,66 +768,136 @@ class DerivativeEvaluator extends Evaluator {
         else if(item instanceof Sum) {
             let lhs = this.derivative(item.lhs, variable);
             let rhs = this.derivative(item.rhs, variable);
-            return this.simplify(new Sum(lhs, rhs));
+            return Simplifier.simplify(new Sum(lhs, rhs));
+        } else if(item instanceof Subtraction) {
+            let lhs = this.derivative(item.lhs, variable);
+            let rhs = this.derivative(item.rhs, variable);
+            return Simplifier.simplify(new Subtraction(lhs, rhs));
         } else if(item instanceof Multiplication) {
             let d1 = this.derivative(item.lhs, variable);
             let d2 = this.derivative(item.rhs, variable);
             let res1 = new Multiplication(d1, item.rhs);
             let res2 = new Multiplication(item.lhs, d2);
-            return this.simplify(new Sum(res1, res2));
-        } else {
-            return item;
+            return Simplifier.simplify(new Sum(res1, res2));
+        } else if(item instanceof Fraction) {
+            let dg = this.derivative(item.lhs, variable);
+            let dh = this.derivative(item.rhs, variable);
+            let res1 = new Multiplication(dg, item.rhs);
+            let res2 = new Multiplication(item.lhs, dh);
+            let numerator = new Subtraction(res1, res2);
+            let denominator = new Power(item.rhs, new Integer(2));
+            return Simplifier.simplify(new Fraction(numerator, denominator));
+        } else if(item instanceof Power) {
+            let base = item.lhs;
+            let exponent = item.rhs;
+            if(exponent instanceof Integer) {
+                let dx_base = this.derivative(base, variable);
+                let t1 = new Power(base, new Subtraction(exponent, new Integer(1)));
+                return Simplifier.simplify(Multiplication.multiMultiplication([exponent, t1, dx_base])); 
+            }
         }
+        return new Derivative(variable, item);
     }
 
-    /**
-     * 
-     * @param {StackItem} item 
-     */
-    simplify(item) {
-        if(item instanceof Sum) {
-            let lhs = this.simplify(item.lhs);
-            let rhs = this.simplify(item.rhs);
-            if(lhs instanceof Integer && rhs instanceof Integer) {
-                return new Integer(lhs.value + rhs.value);
-            }
-            if(lhs instanceof Integer && lhs.value == 0) {
-                return this.simplify(rhs);
-            }
-            if(rhs instanceof Integer && rhs.value == 0) {
-                return this.simplify(lhs);
-            }
-            if(lhs instanceof Variable && rhs instanceof Variable) {
-                if(lhs.name == rhs.name) {
-                    return new Multiplication(new Integer(2), lhs);
-                }
-            }
-            return new Sum(lhs, rhs);
-        }
-        if(item instanceof Multiplication) {
-            let lhs = this.simplify(item.lhs);
-            let rhs = this.simplify(item.rhs);
-            if(lhs instanceof Integer && rhs instanceof Integer) {
-                return new Integer(lhs.value * rhs.value);
-            }
-            if(lhs instanceof Integer) {
-                if(lhs.value == 1) {
-                    return this.simplify(rhs);
-                } else if(lhs.value == 0) {
-                    return new Integer(0);
-                }
-            }
-            if(rhs instanceof Integer) {
-                if(rhs.value == 1) {
-                    return this.simplify(lhs);
-                } else if(lhs.value == 0) {
-                    return new Integer(0);
-                }
-            }
-            return new Multiplication(lhs, rhs);
-        }
-        return item;
-    }
+    // /**
+    //  * 
+    //  * @param {StackItem} item 
+    //  */
+    // simplify(item) {
+    //     if(item instanceof Sum) {
+    //         let lhs = this.simplify(item.lhs);
+    //         let rhs = this.simplify(item.rhs);
+    //         if(lhs instanceof Integer && rhs instanceof Integer) {
+    //             return new Integer(lhs.value + rhs.value);
+    //         }
+    //         if(lhs instanceof Integer && lhs.value == 0) {
+    //             return this.simplify(rhs);
+    //         }
+    //         if(rhs instanceof Integer && rhs.value == 0) {
+    //             return this.simplify(lhs);
+    //         }
+    //         if(lhs instanceof Variable && rhs instanceof Variable) {
+    //             if(lhs.name == rhs.name) {
+    //                 return new Multiplication(new Integer(2), lhs);
+    //             }
+    //         }
+    //         return new Sum(lhs, rhs);
+    //     }
+    //     if(item instanceof Subtraction) {
+    //         let lhs = this.simplify(item.lhs);
+    //         let rhs = this.simplify(item.rhs);
+    //         if(lhs instanceof Integer && rhs instanceof Integer) {
+    //             return new Integer(lhs.value - rhs.value);
+    //         }
+    //         if(lhs instanceof Integer && lhs.value == 0) {
+    //             return this.simplify(rhs);
+    //         }
+    //         if(rhs instanceof Integer && rhs.value == 0) {
+    //             return this.simplify(lhs);
+    //         }
+    //         if(lhs instanceof Variable && rhs instanceof Variable) {
+    //             if(lhs.name == rhs.name) {
+    //                 return new Integer(0);
+    //             }
+    //         }
+    //         return new Subtraction(lhs, rhs);
+    //     }
+    //     if(item instanceof Multiplication) {
+    //         let lhs = this.simplify(item.lhs);
+    //         let rhs = this.simplify(item.rhs);
+    //         if(lhs instanceof Integer && rhs instanceof Integer) {
+    //             return new Integer(lhs.value * rhs.value);
+    //         }
+    //         if(lhs instanceof Integer) {
+    //             if(lhs.value == 1) {
+    //                 return this.simplify(rhs);
+    //             } else if(lhs.value == 0) {
+    //                 return new Integer(0);
+    //             }
+    //         }
+    //         if(rhs instanceof Integer) {
+    //             if(rhs.value == 1) {
+    //                 return this.simplify(lhs);
+    //             } else if(lhs.value == 0) {
+    //                 return new Integer(0);
+    //             }
+    //         }
+    //         return new Multiplication(lhs, rhs);
+    //     }
+    //     if(item instanceof Fraction) {
+    //         let numerator = this.simplify(item.lhs);
+    //         let denominator = this.simplify(item.rhs);
+    //         if(denominator instanceof Integer) {
+    //             if(denominator.value == 1) {
+    //                 return numerator;
+    //             }
+    //         }
+    //         return new Fraction(numerator, denominator);
+    //     }
+    //     if(item instanceof Power) {
+    //         let base = this.simplify(item.lhs);
+    //         let exponent = this.simplify(item.rhs);
+    //         if(base instanceof Integer && exponent instanceof Integer) {
+    //             return item.numericValue();
+    //         }
+    //         if(base instanceof Integer) {
+    //             if(base.value == 1) {
+    //                 return base;
+    //             } else if(base.value == 0) {
+    //                 return new Integer(0);
+    //             }
+    //         }
+    //         if(exponent instanceof Integer) {
+    //             if(exponent.value == 1) {
+    //                 return base;
+    //             } else if(exponent.value == 0 && !(base instanceof Integer && base.value == 0)) {
+    //                 return new Integer(0);
+    //             }
+    //         }
+    //         return new Power(base, exponent);
+    //     }
+    //     return item;
+    // }
 
     /**
      * 
